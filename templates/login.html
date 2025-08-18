@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SAOS - Login</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://unpkg.com/imask"></script>
+</head>
+<body class="bg-gradient-to-br from-blue-50 to-indigo-100 min-h-screen flex items-center justify-center p-4">
+    <div class="w-full max-w-md">
+        <!-- Logo e Título -->
+        <div class="text-center mb-8">
+            <div class="inline-flex items-center justify-center w-16 h-16 bg-blue-600 rounded-full mb-4">
+                <i class="fas fa-tools text-white text-2xl"></i>
+            </div>
+            <h1 class="text-3xl font-bold text-gray-900">SAOS</h1>
+            <p class="text-gray-600 mt-2">Sistema de Abertura de OS - Medware</p>
+        </div>
+
+        <!-- Card de Login -->
+        <div class="bg-white rounded-xl shadow-lg overflow-hidden">
+            <!-- Header do Card -->
+            <div class="bg-gradient-to-r from-blue-600 to-indigo-600 px-6 py-4">
+                <h2 class="text-xl font-semibold text-white text-center">
+                    <i class="fas fa-sign-in-alt mr-2"></i>
+                    Acesso ao Sistema
+                </h2>
+            </div>
+
+            <!-- Flash Messages -->
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div class="mx-6 mt-4 p-4 rounded-lg {% if category == 'error' %}bg-red-50 border border-red-200{% else %}bg-green-50 border border-green-200{% endif %}">
+                            <div class="flex">
+                                <i class="fas {% if category == 'error' %}fa-exclamation-circle text-red-500{% else %}fa-check-circle text-green-500{% endif %} mt-1 mr-3"></i>
+                                <div>
+                                    <p class="{% if category == 'error' %}text-red-800{% else %}text-green-800{% endif %} font-medium">
+                                        {% if category == 'error' %}Erro{% else %}Sucesso{% endif %}
+                                    </p>
+                                    <p class="{% if category == 'error' %}text-red-700{% else %}text-green-700{% endif %} text-sm">{{ message }}</p>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+
+            <!-- Form de Login -->
+            <form id="loginForm" method="POST" class="p-6 space-y-6">
+                <!-- Tipo de Usuário -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-3">
+                        <i class="fas fa-user-tag mr-2 text-blue-600"></i>
+                        Tipo de Acesso
+                    </label>
+                    <div class="grid grid-cols-2 gap-3">
+                        <label class="relative">
+                            <input type="radio" name="tipo_usuario" value="cliente" class="sr-only" checked>
+                            <div class="border-2 border-gray-300 rounded-lg p-4 text-center cursor-pointer transition-all hover:border-blue-400 radio-option">
+                                <i class="fas fa-user text-2xl text-gray-400 mb-2"></i>
+                                <p class="text-sm font-medium text-gray-700">Cliente</p>
+                                <p class="text-xs text-gray-500">CPF/CNPJ</p>
+                            </div>
+                        </label>
+                        <label class="relative">
+                            <input type="radio" name="tipo_usuario" value="tecnico" class="sr-only">
+                            <div class="border-2 border-gray-300 rounded-lg p-4 text-center cursor-pointer transition-all hover:border-blue-400 radio-option">
+                                <i class="fas fa-user-cog text-2xl text-gray-400 mb-2"></i>
+                                <p class="text-sm font-medium text-gray-700">Técnico</p>
+                                <p class="text-xs text-gray-500">E-mail</p>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Campo de Identificação -->
+                <div id="campoCliente" class="campo-identificacao">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                        <i class="fas fa-id-card mr-2 text-blue-600"></i>
+                        CPF ou CNPJ
+                    </label>
+                    <input 
+                        type="text" 
+                        name="identificacao" 
+                        id="identificacaoCliente"
+                        placeholder="000.000.000-00 ou 00.000.000/0000-00" 
+                        class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                        required
+                    />
+                </div>
+
+                <div id="campoTecnico" class="campo-identificacao hidden">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                        <i class="fas fa-envelope mr-2 text-blue-600"></i>
+                        E-mail Corporativo
+                    </label>
+                    <input 
+                        type="email" 
+                        name="identificacao" 
+                        id="identificacaoTecnico"
+                        placeholder="seu.email@empresa.com" 
+                        class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                    />
+                </div>
+
+                <!-- Senha -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                        <i class="fas fa-lock mr-2 text-blue-600"></i>
+                        Senha
+                    </label>
+                    <div class="relative">
+                        <input 
+                            type="password" 
+                            name="senha" 
+                            id="senha"
+                            placeholder="Digite sua senha" 
+                            class="w-full p-3 pr-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                            required
+                        />
+                        <button 
+                            type="button" 
+                            id="toggleSenha"
+                            class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600"
+                        >
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Botão de Login -->
+                <button 
+                    type="submit" 
+                    class="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-3 px-4 rounded-lg font-medium hover:from-blue-700 hover:to-indigo-700 focus:ring-4 focus:ring-blue-300 transition-all duration-200 flex items-center justify-center"
+                >
+                    <i class="fas fa-sign-in-alt mr-2"></i>
+                    Entrar no Sistema
+                </button>
+            </form>
+
+            <!-- Links Adicionais -->
+            <div class="px-6 pb-6">
+                <div class="border-t border-gray-200 pt-4">
+                    <div class="text-center space-y-2">
+                        <a href="#" class="text-sm text-blue-600 hover:text-blue-800 block">
+                            <i class="fas fa-question-circle mr-1"></i>
+                            Esqueci minha senha
+                        </a>
+                        <a href="#" class="text-sm text-gray-600 hover:text-gray-800 block">
+                            <i class="fas fa-user-plus mr-1"></i>
+                            Primeiro acesso? Cadastre-se
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="text-center mt-8 text-sm text-gray-600">
+            <p>
+                <i class="fas fa-shield-alt mr-1"></i>
+                Sistema seguro e confidencial
+            </p>
+            <p class="mt-1">
+                <i class="fas fa-headset mr-1"></i>
+                Suporte: suporte@medware.com.br
+            </p>
+        </div>
+    </div>
+
+    <script>
+        // Máscaras para CPF e CNPJ
+        const identificacaoCliente = document.getElementById('identificacaoCliente');
+        const identificacaoTecnico = document.getElementById('identificacaoTecnico');
+        
+        // Máscara para CPF
+        IMask(identificacaoCliente, {
+            mask: [
+                { mask: '000.000.000-00' }, // CPF
+                { mask: '00.000.000/0000-00' } // CNPJ
+            ]
+        });
+
+        // Toggle de senha
+        const toggleSenha = document.getElementById('toggleSenha');
+        const senhaInput = document.getElementById('senha');
+        
+        toggleSenha.addEventListener('click', function() {
+            const type = senhaInput.type === 'password' ? 'text' : 'password';
+            senhaInput.type = type;
+            
+            const icon = this.querySelector('i');
+            icon.className = type === 'password' ? 'fas fa-eye' : 'fas fa-eye-slash';
+        });
+
+        // Troca de tipo de usuário
+        const radioButtons = document.querySelectorAll('input[name="tipo_usuario"]');
+        const campoCliente = document.getElementById('campoCliente');
+        const campoTecnico = document.getElementById('campoTecnico');
+        const radioOptions = document.querySelectorAll('.radio-option');
+
+        radioButtons.forEach((radio, index) => {
+            radio.addEventListener('change', function() {
+                // Atualiza visual dos radio buttons
+                radioOptions.forEach(option => {
+                    option.classList.remove('border-blue-500', 'bg-blue-50');
+                    option.classList.add('border-gray-300');
+                    const icon = option.querySelector('i');
+                    icon.classList.remove('text-blue-500');
+                    icon.classList.add('text-gray-400');
+                });
+
+                if (this.checked) {
+                    radioOptions[index].classList.remove('border-gray-300');
+                    radioOptions[index].classList.add('border-blue-500', 'bg-blue-50');
+                    const icon = radioOptions[index].querySelector('i');
+                    icon.classList.remove('text-gray-400');
+                    icon.classList.add('text-blue-500');
+                }
+
+                // Mostra/esconde campos
+                if (this.value === 'cliente') {
+                    campoCliente.classList.remove('hidden');
+                    campoTecnico.classList.add('hidden');
+                    identificacaoCliente.required = true;
+                    identificacaoTecnico.required = false;
+                    identificacaoTecnico.value = '';
+                    identificacaoCliente.disabled = false;
+                    identificacaoTecnico.disabled = true;
+                } else {
+                    campoCliente.classList.add('hidden');
+                    campoTecnico.classList.remove('hidden');
+                    identificacaoCliente.required = false;
+                    identificacaoTecnico.required = true;
+                    identificacaoCliente.value = '';
+                    identificacaoCliente.disabled = true;
+                    identificacaoTecnico.disabled = false;
+                }
+            });
+        });
+
+        // Validação do formulário
+        document.getElementById('loginForm').addEventListener('submit', function(e) {
+            const tipoUsuario = document.querySelector('input[name="tipo_usuario"]:checked').value;
+            const identificacao = tipoUsuario === 'cliente' ? identificacaoCliente.value : identificacaoTecnico.value;
+            const senha = senhaInput.value;
+
+            console.log('Tipo usuário:', tipoUsuario);
+            console.log('Identificação:', identificacao);
+            console.log('Senha:', senha);
+
+            if (!identificacao.trim() || !senha.trim()) {
+                e.preventDefault();
+                alert('Por favor, preencha todos os campos obrigatórios.');
+                return;
+            }
+
+            // Validação específica por tipo
+            if (tipoUsuario === 'cliente') {
+                const cpfCnpj = identificacao.replace(/\D/g, '');
+                if (cpfCnpj.length !== 11 && cpfCnpj.length !== 14) {
+                    e.preventDefault();
+                    alert('CPF deve ter 11 dígitos ou CNPJ deve ter 14 dígitos.');
+                    return;
+                }
+            } else {
+                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                if (!emailRegex.test(identificacao)) {
+                    e.preventDefault();
+                    alert('Por favor, insira um e-mail válido.');
+                    return;
+                }
+            }
+        });
+        
+        // Inicializar campos corretos quando a página carrega
+        document.addEventListener('DOMContentLoaded', function() {
+            const tipoUsuario = document.querySelector('input[name="tipo_usuario"]:checked').value;
+            if (tipoUsuario === 'cliente') {
+                identificacaoCliente.required = true;
+                identificacaoTecnico.required = false;
+                identificacaoTecnico.disabled = true;
+            } else {
+                identificacaoCliente.required = false;
+                identificacaoTecnico.required = true;
+                identificacaoCliente.disabled = true;
+            }
+        });
+    </script>
+</body>
+</html>

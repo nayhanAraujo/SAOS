@@ -5,7 +5,7 @@ import os
 def enviar_email(sistema, tipo, nome, telefone, email_solicitante, descricao, caminho_anexo):
     msg = EmailMessage()
     msg['Subject'] = f'Nova Solicitação - {sistema}'
-    msg['From'] = 'suporte@empresa.com.br'
+    msg['From'] = 'nayhanbsb@gmail.com'
     msg['To'] = 'nayhanzimmm@gmail.com'
 
     corpo = f'''
@@ -27,5 +27,5 @@ def enviar_email(sistema, tipo, nome, telefone, email_solicitante, descricao, ca
 
     with smtplib.SMTP('smtp.gmail.com', 587) as smtp:
         smtp.starttls()
-        smtp.login('nayhanbsb@gmail.com', 'znsx njwo kaov sxiu')
+        smtp.login('nayhanbsb@gmail.com', 'anby stye adol fccr')
         smtp.send_message(msg)

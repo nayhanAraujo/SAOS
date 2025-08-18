@@ -2,27 +2,323 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <title>Abertura de OS</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Medware - SAOS - Abertura de Solicitação</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://unpkg.com/imask"></script>
+    <script src="https://cdn.jsdelivr.net/npm/validator@13.11.0/validator.min.js"></script>
 </head>
-<body class="bg-gray-100 p-10">
-    <div class="max-w-xl mx-auto bg-white p-8 rounded shadow">
-        <h2 class="text-2xl font-bold mb-6">Abertura de Solicitação</h2>
+<body class="bg-gradient-to-br from-blue-50 to-indigo-100 min-h-screen">
+    <!-- Header -->
+    <header class="bg-white shadow-sm border-b">
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center py-4">
+                <div class="flex items-center">
+                    <i class="fas fa-tools text-blue-600 text-2xl mr-3"></i>
+                    <div>
+                        <h1 class="text-xl font-bold text-gray-900">SAOS</h1>
+                        <p class="text-sm text-gray-600">Sistema de Abertura de OS - Medware</p>
+                    </div>
+                </div>
+                <div class="text-right">
+                    <p class="text-sm text-gray-600">Suporte Técnico</p>
+                    <p class="text-xs text-gray-500">24/7</p>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <!-- Progress Steps -->
+        <div class="mb-8">
+            <div class="flex items-center justify-center">
+                <div class="flex items-center">
+                    <div class="bg-blue-600 text-white rounded-full h-10 w-10 flex items-center justify-center">
+                        <i class="fas fa-file-alt"></i>
+                    </div>
+                    <div class="bg-blue-600 h-1 w-16"></div>
+                    <div class="bg-gray-300 text-gray-500 rounded-full h-10 w-10 flex items-center justify-center">
+                        <i class="fas fa-check"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="flex justify-center mt-2">
+                <span class="text-sm font-medium text-blue-600">Preencha os dados</span>
+                <span class="text-sm text-gray-500 ml-8">Confirmação</span>
+            </div>
+        </div>
+
+        <!-- Form Card -->
+        <div class="bg-white rounded-xl shadow-lg overflow-hidden">
+            <!-- Form Header -->
+            <div class="bg-gradient-to-r from-blue-600 to-indigo-600 px-6 py-4">
+                <h2 class="text-xl font-semibold text-white">
+                    <i class="fas fa-plus-circle mr-2"></i>
+                    Nova Solicitação de Suporte
+                </h2>
+                <p class="text-blue-100 text-sm mt-1">
+                    Preencha os dados abaixo para abrir sua solicitação
+                </p>
+            </div>
+
+            <!-- Flash Messages -->
         {% with messages = get_flashed_messages() %}
             {% if messages %}
-                <div class="bg-green-100 p-3 rounded mb-4">{{ messages[0] }}</div>
+                    <div class="mx-6 mt-4 p-4 bg-green-50 border border-green-200 rounded-lg">
+                        <div class="flex">
+                            <i class="fas fa-check-circle text-green-500 mt-1 mr-3"></i>
+                            <div>
+                                <p class="text-green-800 font-medium">Sucesso!</p>
+                                <p class="text-green-700 text-sm">{{ messages[0] }}</p>
+                            </div>
+                        </div>
+                    </div>
             {% endif %}
         {% endwith %}
-        <form action="/" method="POST" enctype="multipart/form-data" class="space-y-4">
-            <input name="sistema" placeholder="Sistema" required class="w-full p-2 border rounded" />
-            <input name="tipo" placeholder="Tipo de Solicitação" required class="w-full p-2 border rounded" />
-            <input name="nome" placeholder="Nome" required class="w-full p-2 border rounded" />
-            <input name="telefone" placeholder="Telefone" required class="w-full p-2 border rounded" />
-            <input type="email" name="email" placeholder="E-mail" required class="w-full p-2 border rounded" />
-            <textarea name="descricao" placeholder="Descrição da Solicitação" required class="w-full p-2 border rounded"></textarea>
-            <input type="file" name="arquivo" accept=".pdf,image/*" class="w-full" />
-            <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded">Enviar Solicitação</button>
+
+            <!-- Form -->
+            <form id="solicitacaoForm" action="/" method="POST" enctype="multipart/form-data" class="p-6 space-y-6">
+                <!-- Sistema e Tipo -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            <i class="fas fa-desktop mr-2 text-blue-600"></i>
+                            Sistema
+                        </label>
+                        <select name="sistema" required class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors">
+                            <option value="">Selecione o sistema...</option>
+                            <option value="Sistema Principal">Sistema Principal</option>
+                            <option value="Portal Web">Portal Web</option>
+                            <option value="App Mobile">App Mobile</option>
+                            <option value="Sistema Financeiro">Sistema Financeiro</option>
+                            <option value="Sistema de Vendas">Sistema de Vendas</option>
+                            <option value="Outro">Outro</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            <i class="fas fa-tag mr-2 text-blue-600"></i>
+                            Tipo de Solicitação
+                        </label>
+                        <select name="tipo" required class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors">
+                            <option value="">Selecione o tipo...</option>
+                            <option value="Problema de Acesso">Problema de Acesso</option>
+                            <option value="Bug/Erro">Bug/Erro</option>
+                            <option value="Nova Funcionalidade">Nova Funcionalidade</option>
+                            <option value="Melhoria">Melhoria</option>
+                            <option value="Dúvida">Dúvida</option>
+                            <option value="Treinamento">Treinamento</option>
+                            <option value="Outro">Outro</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Dados do Usuário Logado -->
+                <div class="bg-blue-50 p-4 rounded-lg border border-blue-200">
+                    <h3 class="text-lg font-medium text-gray-900 mb-4">
+                        <i class="fas fa-user-check mr-2 text-blue-600"></i>
+                        Dados do Solicitante
+                    </h3>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Nome</label>
+                            <p class="text-sm text-gray-900 font-medium">{{ session.usuario_nome }}</p>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">E-mail</label>
+                            <p class="text-sm text-gray-900">{{ session.usuario_email }}</p>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Tipo</label>
+                            <span class="px-2 py-1 text-xs rounded-full {{ 'bg-green-100 text-green-800' if session.usuario_tipo == 'CLIENTE' else 'bg-blue-100 text-blue-800' }}">
+                                {{ session.usuario_tipo }}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Descrição -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                        <i class="fas fa-align-left mr-2 text-blue-600"></i>
+                        Descrição da Solicitação *
+                    </label>
+                    <textarea 
+                        name="descricao" 
+                        placeholder="Descreva detalhadamente sua solicitação, problema ou dúvida..." 
+                        required 
+                        rows="5"
+                        class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors resize-none"
+                        minlength="10"
+                    ></textarea>
+                    <div class="flex justify-between items-center mt-2">
+                        <p class="text-xs text-gray-500">
+                            <i class="fas fa-lightbulb mr-1"></i>
+                            Quanto mais detalhes, melhor será a abertura da solicitação
+                        </p>
+                        <span id="charCount" class="text-xs text-gray-400">0 caracteres</span>
+                    </div>
+                </div>
+
+                <!-- Anexo -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                        <i class="fas fa-paperclip mr-2 text-blue-600"></i>
+                        Anexo (Opcional)
+                    </label>
+                    <div class="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-blue-400 transition-colors">
+                        <input 
+                            type="file" 
+                            name="arquivo" 
+                            id="arquivo"
+                            accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.gif" 
+                            class="hidden"
+                        />
+                        <label for="arquivo" class="cursor-pointer">
+                            <i class="fas fa-cloud-upload-alt text-3xl text-gray-400 mb-2"></i>
+                            <p class="text-sm text-gray-600">
+                                <span class="text-blue-600 font-medium">Clique para selecionar</span> ou arraste o arquivo aqui
+                            </p>
+                            <p class="text-xs text-gray-500 mt-1">
+                                PDF, DOC, DOCX, JPG, PNG, GIF (máx. 10MB)
+                            </p>
+                        </label>
+                    </div>
+                    <div id="fileInfo" class="mt-2 text-sm text-gray-600 hidden">
+                        <i class="fas fa-file mr-1"></i>
+                        <span id="fileName"></span>
+                        <button type="button" id="removeFile" class="ml-2 text-red-600 hover:text-red-800">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Submit Button -->
+                <div class="flex justify-end pt-6 border-t border-gray-200">
+                    <button 
+                        type="submit" 
+                        id="submitBtn"
+                        class="bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-8 py-3 rounded-lg font-medium hover:from-blue-700 hover:to-indigo-700 focus:ring-4 focus:ring-blue-300 transition-all duration-200 flex items-center"
+                        disabled
+                    >
+                        <i class="fas fa-paper-plane mr-2"></i>
+                        Enviar Solicitação
+                    </button>
+                </div>
         </form>
+        </div>
+
+        <!-- Footer -->
+        <div class="text-center mt-8 text-sm text-gray-600">
+            <p>
+                <i class="fas fa-shield-alt mr-1"></i>
+                Suas informações estão seguras e serão tratadas com confidencialidade
+            </p>
+            <p class="mt-1">
+                <i class="fas fa-clock mr-1"></i>
+                Tempo médio de resposta: 24 horas
+            </p>
+        </div>
+    </main>
+
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex items-center justify-center">
+        <div class="bg-white rounded-lg p-6 flex items-center">
+            <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mr-3"></div>
+            <span class="text-gray-700">Enviando solicitação...</span>
+        </div>
     </div>
+
+    <script>
+        // Validação do formulário
+        function validateForm() {
+            const requiredFields = document.querySelectorAll('[required]');
+            const submitBtn = document.getElementById('submitBtn');
+            let isValid = true;
+
+            requiredFields.forEach(field => {
+                if (!field.value.trim()) {
+                    isValid = false;
+                }
+            });
+
+            // Validação da descrição
+            if (descricaoTextarea.value.length < 10) {
+                isValid = false;
+            }
+
+            submitBtn.disabled = !isValid;
+            
+            if (isValid) {
+                submitBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+                submitBtn.classList.add('hover:from-blue-700', 'hover:to-indigo-700');
+            } else {
+                submitBtn.classList.add('opacity-50', 'cursor-not-allowed');
+                submitBtn.classList.remove('hover:from-blue-700', 'hover:to-indigo-700');
+            }
+        }
+
+        // Contador de caracteres
+        const descricaoTextarea = document.querySelector('textarea[name="descricao"]');
+        const charCount = document.getElementById('charCount');
+        
+        descricaoTextarea.addEventListener('input', function() {
+            const count = this.value.length;
+            charCount.textContent = `${count} caracteres`;
+            
+            if (count < 10) {
+                charCount.classList.add('text-red-500');
+                charCount.classList.remove('text-gray-400');
+            } else {
+                charCount.classList.remove('text-red-500');
+                charCount.classList.add('text-gray-400');
+            }
+            validateForm();
+        });
+
+        // Upload de arquivo
+        const arquivoInput = document.getElementById('arquivo');
+        const fileInfo = document.getElementById('fileInfo');
+        const fileName = document.getElementById('fileName');
+        const removeFile = document.getElementById('removeFile');
+
+        arquivoInput.addEventListener('change', function() {
+            if (this.files.length > 0) {
+                const file = this.files[0];
+                const maxSize = 10 * 1024 * 1024; // 10MB
+                
+                if (file.size > maxSize) {
+                    alert('Arquivo muito grande. Tamanho máximo: 10MB');
+                    this.value = '';
+                    return;
+                }
+                
+                fileName.textContent = file.name;
+                fileInfo.classList.remove('hidden');
+            }
+        });
+
+        removeFile.addEventListener('click', function() {
+            arquivoInput.value = '';
+            fileInfo.classList.add('hidden');
+        });
+
+        // Validar campos obrigatórios
+        document.querySelectorAll('[required]').forEach(field => {
+            field.addEventListener('input', validateForm);
+            field.addEventListener('change', validateForm);
+        });
+
+        // Submit do formulário
+        document.getElementById('solicitacaoForm').addEventListener('submit', function(e) {
+            const loadingOverlay = document.getElementById('loadingOverlay');
+            loadingOverlay.classList.remove('hidden');
+        });
+
+        // Inicializar validação
+        validateForm();
+    </script>
 </body>
 </html>

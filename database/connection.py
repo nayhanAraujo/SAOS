@@ -5,10 +5,11 @@ import firebird.driver as fbd
 def db_connection():
     try:
         con = fbd.connect(
-            r'C:\Users\Nayha\Documents\azure\SAOS\database\SAOS.FDB',
+            r'nayhan/3052:C:\Users\Nayhan.MEDWARE\Documents\PROJETOS AZURE\11 -AZURE - SISTEMA DE ABERTURA DE OS\SAOS\database\SAOS.FDB',
             user='SYSDBA',
             password='masterkey',
             charset='UTF8'
+           
         )
         print("Conectado com sucesso ao banco de dados.")
         yield con

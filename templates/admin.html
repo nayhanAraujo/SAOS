@@ -1,0 +1,720 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SAOS - Administração</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body class="bg-gray-50">
+    <!-- Header -->
+    <header class="bg-white shadow-sm border-b">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center py-4">
+                <div class="flex items-center">
+                    <i class="fas fa-tools text-blue-600 text-2xl mr-3"></i>
+                    <div>
+                        <h1 class="text-xl font-bold text-gray-900">SAOS - Administração</h1>
+                        <p class="text-sm text-gray-600">Painel de Controle</p>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <span class="text-sm text-gray-600">
+                        <i class="fas fa-user mr-1"></i>
+                        {{ session.usuario_nome }}
+                    </span>
+                    <a href="{{ url_for('auth.logout') }}" class="text-red-600 hover:text-red-800">
+                        <i class="fas fa-sign-out-alt"></i>
+                        Sair
+                    </a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Navigation -->
+    <nav class="bg-white shadow-sm border-b">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex space-x-8">
+                <a href="{{ url_for('dashboard.dashboard') }}" class="py-4 px-1 border-b-2 border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300">
+                    <i class="fas fa-chart-line mr-2"></i>
+                    Dashboard
+                </a>
+                <a href="{{ url_for('dashboard.admin') }}" class="py-4 px-1 border-b-2 border-blue-500 text-blue-600">
+                    <i class="fas fa-cog mr-2"></i>
+                    Administração
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <!-- Page Header -->
+        <div class="mb-8">
+            <h2 class="text-2xl font-bold text-gray-900">Administração do Sistema</h2>
+            <p class="text-gray-600 mt-2">Gerencie usuários, configurações e templates do sistema</p>
+        </div>
+
+        <!-- Admin Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            <!-- Usuários -->
+            <div class="bg-white rounded-lg shadow p-6 hover:shadow-lg transition-shadow cursor-pointer" onclick="abrirModal('usuarios')">
+                <div class="flex items-center">
+                    <div class="p-3 rounded-full bg-blue-100 text-blue-600">
+                        <i class="fas fa-users text-xl"></i>
+                    </div>
+                    <div class="ml-4">
+                        <p class="text-sm font-medium text-gray-600">Usuários</p>
+                        <p class="text-2xl font-bold text-gray-900" id="total-usuarios">0</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Categorias -->
+            <div class="bg-white rounded-lg shadow p-6 hover:shadow-lg transition-shadow cursor-pointer" onclick="abrirModal('categorias')">
+                <div class="flex items-center">
+                    <div class="p-3 rounded-full bg-green-100 text-green-600">
+                        <i class="fas fa-tags text-xl"></i>
+                    </div>
+                    <div class="ml-4">
+                        <p class="text-sm font-medium text-gray-600">Categorias</p>
+                        <p class="text-2xl font-bold text-gray-900" id="total-categorias">0</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Status -->
+            <div class="bg-white rounded-lg shadow p-6 hover:shadow-lg transition-shadow cursor-pointer" onclick="abrirModal('status')">
+                <div class="flex items-center">
+                    <div class="p-3 rounded-full bg-yellow-100 text-yellow-600">
+                        <i class="fas fa-list-alt text-xl"></i>
+                    </div>
+                    <div class="ml-4">
+                        <p class="text-sm font-medium text-gray-600">Status</p>
+                        <p class="text-2xl font-bold text-gray-900" id="total-status">0</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Templates -->
+            <div class="bg-white rounded-lg shadow p-6 hover:shadow-lg transition-shadow cursor-pointer" onclick="window.location.href='/admin/templates'">
+                <div class="flex items-center">
+                    <div class="p-3 rounded-full bg-purple-100 text-purple-600">
+                        <i class="fas fa-envelope text-xl"></i>
+                    </div>
+                    <div class="ml-4">
+                        <p class="text-sm font-medium text-gray-600">Templates</p>
+                        <p class="text-2xl font-bold text-gray-900" id="total-templates">0</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="bg-white rounded-lg shadow p-6 mb-8">
+            <h3 class="text-lg font-semibold text-gray-900 mb-4">Ações Rápidas</h3>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <button onclick="abrirModal('novo-usuario')" class="flex items-center p-4 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
+                    <i class="fas fa-user-plus text-blue-600 mr-3"></i>
+                    <div class="text-left">
+                        <p class="font-medium text-gray-900">Novo Usuário</p>
+                        <p class="text-sm text-gray-600">Cadastrar cliente ou técnico</p>
+                    </div>
+                </button>
+                
+                <button onclick="abrirModal('nova-categoria')" class="flex items-center p-4 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
+                    <i class="fas fa-plus text-green-600 mr-3"></i>
+                    <div class="text-left">
+                        <p class="font-medium text-gray-900">Nova Categoria</p>
+                        <p class="text-sm text-gray-600">Criar categoria de solicitação</p>
+                    </div>
+                </button>
+                
+                <button onclick="abrirModal('novo-status')" class="flex items-center p-4 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
+                    <i class="fas fa-plus text-yellow-600 mr-3"></i>
+                    <div class="text-left">
+                        <p class="font-medium text-gray-900">Novo Status</p>
+                        <p class="text-sm text-gray-600">Adicionar status de solicitação</p>
+                    </div>
+                </button>
+            </div>
+        </div>
+
+        <!-- System Info -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <!-- Recent Activity -->
+            <div class="bg-white rounded-lg shadow p-6">
+                <h3 class="text-lg font-semibold text-gray-900 mb-4">Atividade Recente</h3>
+                <div id="recent-activity" class="space-y-3">
+                    <div class="flex items-center p-3 bg-gray-50 rounded-lg">
+                        <i class="fas fa-info-circle text-blue-500 mr-3"></i>
+                        <div>
+                            <p class="text-sm font-medium text-gray-900">Sistema iniciado</p>
+                            <p class="text-xs text-gray-500">Há 2 minutos</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- System Status -->
+            <div class="bg-white rounded-lg shadow p-6">
+                <h3 class="text-lg font-semibold text-gray-900 mb-4">Status do Sistema</h3>
+                <div class="space-y-3">
+                    <div class="flex justify-between items-center">
+                        <span class="text-sm text-gray-600">Banco de Dados</span>
+                        <span class="px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full">Online</span>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span class="text-sm text-gray-600">Serviço de Email</span>
+                        <span class="px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full">Ativo</span>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span class="text-sm text-gray-600">Último Backup</span>
+                        <span class="text-sm text-gray-900">Hoje 08:00</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Modal Container -->
+    <div id="modal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden z-50">
+        <div class="flex items-center justify-center min-h-screen p-4">
+            <div class="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-screen overflow-y-auto">
+                <div id="modal-content">
+                    <!-- Conteúdo será carregado dinamicamente -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Carregar dados iniciais
+        document.addEventListener('DOMContentLoaded', function() {
+            carregarEstatisticas();
+        });
+
+        // Função para carregar estatísticas
+        async function carregarEstatisticas() {
+            try {
+                const response = await fetch('/api/v1/admin/stats');
+                const data = await response.json();
+                
+                if (data.success) {
+                    document.getElementById('total-usuarios').textContent = data.data.usuarios || 0;
+                    document.getElementById('total-categorias').textContent = data.data.categorias || 0;
+                    document.getElementById('total-status').textContent = data.data.status || 0;
+                    document.getElementById('total-templates').textContent = data.data.templates || 0;
+                }
+            } catch (error) {
+                console.error('Erro ao carregar estatísticas:', error);
+            }
+        }
+
+        // Função para abrir modais
+        function abrirModal(tipo) {
+            const modal = document.getElementById('modal');
+            const modalContent = document.getElementById('modal-content');
+            
+            // Carregar conteúdo baseado no tipo
+            switch(tipo) {
+                case 'usuarios':
+                    carregarModalUsuarios(modalContent);
+                    break;
+                case 'categorias':
+                    carregarModalCategorias(modalContent);
+                    break;
+                case 'status':
+                    carregarModalStatus(modalContent);
+                    break;
+                case 'templates':
+                    carregarModalTemplates(modalContent);
+                    break;
+                case 'novo-usuario':
+                    carregarModalNovoUsuario(modalContent);
+                    break;
+                case 'nova-categoria':
+                    carregarModalNovaCategoria(modalContent);
+                    break;
+                case 'novo-status':
+                    carregarModalNovoStatus(modalContent);
+                    break;
+            }
+            
+            modal.classList.remove('hidden');
+        }
+
+        // Função para fechar modal
+        function fecharModal() {
+            document.getElementById('modal').classList.add('hidden');
+        }
+
+        // Carregar modal de usuários
+        async function carregarModalUsuarios(container) {
+            try {
+                const response = await fetch('/api/v1/usuarios');
+                const data = await response.json();
+                
+                container.innerHTML = `
+                    <div class="px-6 py-4 border-b border-gray-200">
+                        <div class="flex justify-between items-center">
+                            <h3 class="text-lg font-semibold text-gray-900">Gerenciar Usuários</h3>
+                            <button onclick="fecharModal()" class="text-gray-400 hover:text-gray-600">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="p-6">
+                        <div class="flex justify-between items-center mb-4">
+                            <h4 class="text-md font-medium text-gray-900">Lista de Usuários</h4>
+                            <button onclick="abrirModal('novo-usuario')" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">
+                                <i class="fas fa-plus mr-2"></i>Novo Usuário
+                            </button>
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table class="min-w-full divide-y divide-gray-200">
+                                <thead class="bg-gray-50">
+                                    <tr>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Nome</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Email</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Tipo</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Ações</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="bg-white divide-y divide-gray-200">
+                                    ${data.success ? data.data.map(usuario => `
+                                        <tr>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${usuario.NOME}</td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${usuario.EMAIL}</td>
+                                            <td class="px-6 py-4 whitespace-nowrap">
+                                                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${usuario.TIPO_USUARIO === 'ADMIN' ? 'bg-red-100 text-red-800' : usuario.TIPO_USUARIO === 'TECNICO' ? 'bg-blue-100 text-blue-800' : 'bg-green-100 text-green-800'}">
+                                                    ${usuario.TIPO_USUARIO}
+                                                </span>
+                                            </td>
+                                            <td class="px-6 py-4 whitespace-nowrap">
+                                                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${usuario.ATIVO ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}">
+                                                    ${usuario.ATIVO ? 'Ativo' : 'Inativo'}
+                                                </span>
+                                            </td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                                <button onclick="editarUsuario(${usuario.ID})" class="text-blue-600 hover:text-blue-900 mr-3">
+                                                    <i class="fas fa-edit"></i>
+                                                </button>
+                                                <button onclick="toggleUsuario(${usuario.ID})" class="text-${usuario.ATIVO ? 'red' : 'green'}-600 hover:text-${usuario.ATIVO ? 'red' : 'green'}-900">
+                                                    <i class="fas fa-${usuario.ATIVO ? 'ban' : 'check'}"></i>
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    `).join('') : '<tr><td colspan="5" class="px-6 py-4 text-center text-gray-500">Nenhum usuário encontrado</td></tr>'}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                `;
+            } catch (error) {
+                container.innerHTML = `
+                    <div class="px-6 py-4 border-b border-gray-200">
+                        <h3 class="text-lg font-semibold text-gray-900">Erro</h3>
+                    </div>
+                    <div class="p-6">
+                        <p class="text-red-600">Erro ao carregar usuários: ${error.message}</p>
+                    </div>
+                `;
+            }
+        }
+
+        // Carregar modal de categorias
+        async function carregarModalCategorias(container) {
+            try {
+                const response = await fetch('/api/v1/categorias');
+                const data = await response.json();
+                
+                container.innerHTML = `
+                    <div class="px-6 py-4 border-b border-gray-200">
+                        <div class="flex justify-between items-center">
+                            <h3 class="text-lg font-semibold text-gray-900">Gerenciar Categorias</h3>
+                            <button onclick="fecharModal()" class="text-gray-400 hover:text-gray-600">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="p-6">
+                        <div class="flex justify-between items-center mb-4">
+                            <h4 class="text-md font-medium text-gray-900">Categorias de Solicitação</h4>
+                            <button onclick="abrirModal('nova-categoria')" class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700">
+                                <i class="fas fa-plus mr-2"></i>Nova Categoria
+                            </button>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                            ${data.success ? data.data.map(categoria => `
+                                <div class="border border-gray-200 rounded-lg p-4">
+                                    <div class="flex items-center justify-between mb-2">
+                                        <h5 class="font-medium text-gray-900">${categoria.NOME}</h5>
+                                        <div class="flex space-x-2">
+                                            <button onclick="editarCategoria(${categoria.ID})" class="text-blue-600 hover:text-blue-900">
+                                                <i class="fas fa-edit"></i>
+                                            </button>
+                                            <button onclick="excluirCategoria(${categoria.ID})" class="text-red-600 hover:text-red-900">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <p class="text-sm text-gray-600">${categoria.DESCRICAO || 'Sem descrição'}</p>
+                                    <div class="mt-2">
+                                        <span class="inline-block w-4 h-4 rounded-full" style="background-color: ${categoria.COR}"></span>
+                                        <span class="text-xs text-gray-500 ml-1">${categoria.COR}</span>
+                                    </div>
+                                </div>
+                            `).join('') : '<p class="text-gray-500">Nenhuma categoria encontrada</p>'}
+                        </div>
+                    </div>
+                `;
+            } catch (error) {
+                container.innerHTML = `
+                    <div class="px-6 py-4 border-b border-gray-200">
+                        <h3 class="text-lg font-semibold text-gray-900">Erro</h3>
+                    </div>
+                    <div class="p-6">
+                        <p class="text-red-600">Erro ao carregar categorias: ${error.message}</p>
+                    </div>
+                `;
+            }
+        }
+
+        // Carregar modal de status
+        async function carregarModalStatus(container) {
+            try {
+                const response = await fetch('/api/v1/status');
+                const data = await response.json();
+                
+                container.innerHTML = `
+                    <div class="px-6 py-4 border-b border-gray-200">
+                        <div class="flex justify-between items-center">
+                            <h3 class="text-lg font-semibold text-gray-900">Gerenciar Status</h3>
+                            <button onclick="fecharModal()" class="text-gray-400 hover:text-gray-600">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="p-6">
+                        <div class="flex justify-between items-center mb-4">
+                            <h4 class="text-md font-medium text-gray-900">Status de Solicitação</h4>
+                            <button onclick="abrirModal('novo-status')" class="bg-yellow-600 text-white px-4 py-2 rounded-lg hover:bg-yellow-700">
+                                <i class="fas fa-plus mr-2"></i>Novo Status
+                            </button>
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table class="min-w-full divide-y divide-gray-200">
+                                <thead class="bg-gray-50">
+                                    <tr>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Nome</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Cor</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Finalizado</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Ordem</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Ações</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="bg-white divide-y divide-gray-200">
+                                    ${data.success ? data.data.map(status => `
+                                        <tr>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${status.NOME}</td>
+                                            <td class="px-6 py-4 whitespace-nowrap">
+                                                <span class="inline-block w-4 h-4 rounded-full" style="background-color: ${status.COR}"></span>
+                                                <span class="text-xs text-gray-500 ml-1">${status.COR}</span>
+                                            </td>
+                                            <td class="px-6 py-4 whitespace-nowrap">
+                                                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${status.FINALIZADO ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}">
+                                                    ${status.FINALIZADO ? 'Sim' : 'Não'}
+                                                </span>
+                                            </td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${status.ORDEM}</td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                                <button onclick="editarStatus(${status.ID})" class="text-blue-600 hover:text-blue-900 mr-3">
+                                                    <i class="fas fa-edit"></i>
+                                                </button>
+                                                <button onclick="excluirStatus(${status.ID})" class="text-red-600 hover:text-red-900">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    `).join('') : '<tr><td colspan="5" class="px-6 py-4 text-center text-gray-500">Nenhum status encontrado</td></tr>'}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                `;
+            } catch (error) {
+                container.innerHTML = `
+                    <div class="px-6 py-4 border-b border-gray-200">
+                        <h3 class="text-lg font-semibold text-gray-900">Erro</h3>
+                    </div>
+                    <div class="p-6">
+                        <p class="text-red-600">Erro ao carregar status: ${error.message}</p>
+                    </div>
+                `;
+            }
+        }
+
+        // Carregar modal de templates
+        async function carregarModalTemplates(container) {
+            try {
+                const response = await fetch('/api/v1/templates-email');
+                const data = await response.json();
+                
+                container.innerHTML = `
+                    <div class="px-6 py-4 border-b border-gray-200">
+                        <div class="flex justify-between items-center">
+                            <h3 class="text-lg font-semibold text-gray-900">Gerenciar Templates de Email</h3>
+                            <button onclick="fecharModal()" class="text-gray-400 hover:text-gray-600">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="p-6">
+                        <div class="flex justify-between items-center mb-4">
+                            <h4 class="text-md font-medium text-gray-900">Templates Disponíveis</h4>
+                            <button onclick="novoTemplate()" class="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700">
+                                <i class="fas fa-plus mr-2"></i>Novo Template
+                            </button>
+                        </div>
+                        <div class="space-y-4">
+                            ${data.success ? data.data.map(template => `
+                                <div class="border border-gray-200 rounded-lg p-4">
+                                    <div class="flex items-center justify-between mb-2">
+                                        <h5 class="font-medium text-gray-900">${template.NOME}</h5>
+                                        <div class="flex items-center space-x-2">
+                                            <span class="px-2 py-1 text-xs rounded-full ${template.ATIVO ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}">
+                                                ${template.ATIVO ? 'Ativo' : 'Inativo'}
+                                            </span>
+                                            <button onclick="editarTemplate(${template.ID})" class="text-blue-600 hover:text-blue-900">
+                                                <i class="fas fa-edit"></i>
+                                            </button>
+                                            <button onclick="toggleTemplate(${template.ID})" class="text-${template.ATIVO ? 'red' : 'green'}-600 hover:text-${template.ATIVO ? 'red' : 'green'}-900">
+                                                <i class="fas fa-${template.ATIVO ? 'ban' : 'check'}"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <p class="text-sm text-gray-600 mb-2"><strong>Assunto:</strong> ${template.ASSUNTO}</p>
+                                    <p class="text-sm text-gray-600"><strong>Variáveis:</strong> ${template.VARIAVEIS || 'Nenhuma'}</p>
+                                </div>
+                            `).join('') : '<p class="text-gray-500">Nenhum template encontrado</p>'}
+                        </div>
+                    </div>
+                `;
+            } catch (error) {
+                container.innerHTML = `
+                    <div class="px-6 py-4 border-b border-gray-200">
+                        <h3 class="text-lg font-semibold text-gray-900">Erro</h3>
+                    </div>
+                    <div class="p-6">
+                        <p class="text-red-600">Erro ao carregar templates: ${error.message}</p>
+                    </div>
+                `;
+            }
+        }
+
+        // Fechar modal ao clicar fora
+        document.getElementById('modal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                fecharModal();
+            }
+        });
+
+        // Funções para gerenciar usuários
+        async function editarUsuario(id) {
+            console.log('Editando usuário:', id);
+            // Implementar edição de usuário
+            alert('Funcionalidade de edição será implementada em breve');
+        }
+
+        async function toggleUsuario(id) {
+            try {
+                const response = await fetch(`/api/v1/usuarios/${id}/toggle`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    // Recarrega o modal de usuários
+                    abrirModal('usuarios');
+                } else {
+                    alert('Erro: ' + data.error);
+                }
+            } catch (error) {
+                console.error('Erro ao toggle usuário:', error);
+                alert('Erro ao alterar status do usuário');
+            }
+        }
+
+        // Funções para gerenciar categorias
+        async function editarCategoria(id) {
+            console.log('Editando categoria:', id);
+            alert('Funcionalidade de edição será implementada em breve');
+        }
+
+        async function excluirCategoria(id) {
+            if (confirm('Tem certeza que deseja excluir esta categoria?')) {
+                console.log('Excluindo categoria:', id);
+                alert('Funcionalidade de exclusão será implementada em breve');
+            }
+        }
+
+        // Funções para gerenciar status
+        async function editarStatus(id) {
+            console.log('Editando status:', id);
+            alert('Funcionalidade de edição será implementada em breve');
+        }
+
+        async function excluirStatus(id) {
+            if (confirm('Tem certeza que deseja excluir este status?')) {
+                console.log('Excluindo status:', id);
+                alert('Funcionalidade de exclusão será implementada em breve');
+            }
+        }
+
+        // Funções para gerenciar templates
+        async function editarTemplate(id) {
+            console.log('Editando template:', id);
+            alert('Funcionalidade de edição será implementada em breve');
+        }
+
+        async function toggleTemplate(id) {
+            console.log('Toggle template:', id);
+            alert('Funcionalidade de toggle será implementada em breve');
+        }
+
+        async function novoTemplate() {
+            console.log('Novo template');
+            alert('Funcionalidade de novo template será implementada em breve');
+        }
+
+        // Funções para modais de criação
+        function carregarModalNovoUsuario(container) {
+            container.innerHTML = `
+                <div class="px-6 py-4 border-b border-gray-200">
+                    <div class="flex justify-between items-center">
+                        <h3 class="text-lg font-semibold text-gray-900">Novo Usuário</h3>
+                        <button onclick="fecharModal()" class="text-gray-400 hover:text-gray-600">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="p-6">
+                    <form id="formNovoUsuario" class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Nome Completo</label>
+                            <input type="text" name="nome" required class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Email</label>
+                            <input type="email" name="email" required class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">CPF/CNPJ</label>
+                            <input type="text" name="cpf_cnpj" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Telefone</label>
+                            <input type="text" name="telefone" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Tipo de Usuário</label>
+                            <select name="tipo_usuario" required class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                                <option value="">Selecione...</option>
+                                <option value="CLIENTE">Cliente</option>
+                                <option value="TECNICO">Técnico</option>
+                                <option value="ADMIN">Administrador</option>
+                            </select>
+                        </div>
+                        <div class="flex justify-end space-x-3 pt-4">
+                            <button type="button" onclick="fecharModal()" class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50">
+                                Cancelar
+                            </button>
+                            <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+                                Criar Usuário
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            `;
+
+            // Adiciona evento de submit
+            document.getElementById('formNovoUsuario').addEventListener('submit', async function(e) {
+                e.preventDefault();
+                
+                const formData = new FormData(this);
+                const dados = {
+                    nome: formData.get('nome'),
+                    email: formData.get('email'),
+                    cpf_cnpj: formData.get('cpf_cnpj'),
+                    telefone: formData.get('telefone'),
+                    tipo_usuario: formData.get('tipo_usuario')
+                };
+
+                try {
+                    const response = await fetch('/api/v1/usuarios', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(dados)
+                    });
+                    
+                    const result = await response.json();
+                    
+                    if (result.success) {
+                        alert('Usuário criado com sucesso!');
+                        fecharModal();
+                        // Recarrega estatísticas
+                        carregarEstatisticas();
+                    } else {
+                        alert('Erro: ' + result.error);
+                    }
+                } catch (error) {
+                    console.error('Erro ao criar usuário:', error);
+                    alert('Erro ao criar usuário');
+                }
+            });
+        }
+
+        function carregarModalNovaCategoria(container) {
+            container.innerHTML = `
+                <div class="px-6 py-4 border-b border-gray-200">
+                    <div class="flex justify-between items-center">
+                        <h3 class="text-lg font-semibold text-gray-900">Nova Categoria</h3>
+                        <button onclick="fecharModal()" class="text-gray-400 hover:text-gray-600">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="p-6">
+                    <p class="text-gray-600">Funcionalidade será implementada em breve.</p>
+                </div>
+            `;
+        }
+
+        function carregarModalNovoStatus(container) {
+            container.innerHTML = `
+                <div class="px-6 py-4 border-b border-gray-200">
+                    <div class="flex justify-between items-center">
+                        <h3 class="text-lg font-semibold text-gray-900">Novo Status</h3>
+                        <button onclick="fecharModal()" class="text-gray-400 hover:text-gray-600">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="p-6">
+                    <p class="text-gray-600">Funcionalidade será implementada em breve.</p>
+                </div>
+            `;
+        }
+    </script>
+</body>
+</html>

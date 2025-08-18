@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SAOS - Confirmação de Solicitação</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body class="bg-gradient-to-br from-blue-50 to-indigo-100 min-h-screen">
+    <!-- Header -->
+    <header class="bg-white shadow-sm border-b">
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center py-4">
+                <div class="flex items-center">
+                    <i class="fas fa-tools text-blue-600 text-2xl mr-3"></i>
+                    <div>
+                        <h1 class="text-xl font-bold text-gray-900">SAOS</h1>
+                        <p class="text-sm text-gray-600">Sistema de Abertura de OS - Medware</p>
+                    </div>
+                </div>
+                <div class="text-right">
+                    <p class="text-sm text-gray-600">Suporte Técnico</p>
+                    <p class="text-xs text-gray-500">24/7</p>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <!-- Progress Steps -->
+        <div class="mb-8">
+            <div class="flex items-center justify-center">
+                <div class="flex items-center">
+                    <div class="bg-green-600 text-white rounded-full h-10 w-10 flex items-center justify-center">
+                        <i class="fas fa-check"></i>
+                    </div>
+                    <div class="bg-green-600 h-1 w-16"></div>
+                    <div class="bg-green-600 text-white rounded-full h-10 w-10 flex items-center justify-center">
+                        <i class="fas fa-check"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="flex justify-center mt-2">
+                <span class="text-sm font-medium text-green-600">Preencha os dados</span>
+                <span class="text-sm font-medium text-green-600 ml-8">Confirmação</span>
+            </div>
+        </div>
+
+        <!-- Confirmation Card -->
+        <div class="bg-white rounded-xl shadow-lg overflow-hidden">
+            <!-- Header -->
+            <div class="bg-gradient-to-r from-green-600 to-emerald-600 px-6 py-4">
+                <h2 class="text-xl font-semibold text-white text-center">
+                    <i class="fas fa-check-circle mr-2"></i>
+                    Solicitação Enviada com Sucesso!
+                </h2>
+            </div>
+
+            <!-- Content -->
+            <div class="p-8">
+                <!-- Success Icon -->
+                <div class="text-center mb-6">
+                    <div class="inline-flex items-center justify-center w-20 h-20 bg-green-100 rounded-full mb-4">
+                        <i class="fas fa-check text-green-600 text-3xl"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold text-gray-900 mb-2">Solicitação Registrada</h3>
+                    <p class="text-gray-600">Sua solicitação foi enviada e está sendo processada</p>
+                </div>
+
+                <!-- Solicitation Details -->
+                <div class="bg-gray-50 rounded-lg p-6 mb-6">
+                    <h4 class="text-lg font-semibold text-gray-900 mb-4">
+                        <i class="fas fa-info-circle mr-2 text-blue-600"></i>
+                        Detalhes da Solicitação
+                    </h4>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <p class="text-sm font-medium text-gray-600">Código de Referência</p>
+                            <p class="text-lg font-bold text-blue-600">{{ codigo_referencia }}</p>
+                        </div>
+                        <div>
+                            <p class="text-sm font-medium text-gray-600">Data de Criação</p>
+                            <p class="text-gray-900">{{ data_criacao }}</p>
+                        </div>
+                        <div>
+                            <p class="text-sm font-medium text-gray-600">Sistema</p>
+                            <p class="text-gray-900">{{ sistema }}</p>
+                        </div>
+                        <div>
+                            <p class="text-sm font-medium text-gray-600">Tipo</p>
+                            <p class="text-gray-900">{{ tipo }}</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Next Steps -->
+                <div class="bg-blue-50 rounded-lg p-6 mb-6">
+                    <h4 class="text-lg font-semibold text-gray-900 mb-4">
+                        <i class="fas fa-arrow-right mr-2 text-blue-600"></i>
+                        Próximos Passos
+                    </h4>
+                    <ul class="space-y-3">
+                        <li class="flex items-start">
+                            <i class="fas fa-envelope text-blue-600 mt-1 mr-3"></i>
+                            <div>
+                                <p class="font-medium text-gray-900">Email de Confirmação</p>
+                                <p class="text-sm text-gray-600">Você receberá um email de confirmação em breve</p>
+                            </div>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-clock text-blue-600 mt-1 mr-3"></i>
+                            <div>
+                                <p class="font-medium text-gray-900">Análise da Solicitação</p>
+                                <p class="text-sm text-gray-600">Nossa equipe irá analisar sua solicitação em até 24 horas</p>
+                            </div>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-bell text-blue-600 mt-1 mr-3"></i>
+                            <div>
+                                <p class="font-medium text-gray-900">Atualizações</p>
+                                <p class="text-sm text-gray-600">Você será notificado sobre qualquer atualização no status</p>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Actions -->
+                <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                    <a href="{{ url_for('formulario.formulario') }}" 
+                       class="bg-blue-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-blue-700 transition-colors flex items-center justify-center">
+                        <i class="fas fa-plus mr-2"></i>
+                        Nova Solicitação
+                    </a>
+                    <a href="{{ url_for('dashboard.dashboard') }}" 
+                       class="bg-gray-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-gray-700 transition-colors flex items-center justify-center">
+                        <i class="fas fa-chart-line mr-2"></i>
+                        Ver Dashboard
+                    </a>
+                    <button onclick="window.print()" 
+                            class="bg-green-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-green-700 transition-colors flex items-center justify-center">
+                        <i class="fas fa-print mr-2"></i>
+                        Imprimir Comprovante
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="text-center mt-8 text-sm text-gray-600">
+            <p>
+                <i class="fas fa-shield-alt mr-1"></i>
+                Suas informações estão seguras e serão tratadas com confidencialidade
+            </p>
+            <p class="mt-1">
+                <i class="fas fa-headset mr-1"></i>
+                Dúvidas? Entre em contato: suporte@medware.com.br
+            </p>
+        </div>
+    </main>
+
+    <script>
+        // Auto-redirect para dashboard após 10 segundos (opcional)
+        setTimeout(function() {
+            // Descomente a linha abaixo se quiser redirecionamento automático
+            // window.location.href = "{{ url_for('dashboard.dashboard') }}";
+        }, 10000);
+    </script>
+</body>
+</html>

@@ -1,0 +1,858 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SAOS - Gerenciamento de Templates de Email</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/theme/monokai.min.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/xml/xml.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/javascript/javascript.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/css/css.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/htmlmixed/htmlmixed.min.js"></script>
+</head>
+<body class="bg-gray-50">
+    <!-- Header -->
+    <header class="bg-white shadow-sm border-b">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center py-4">
+                <div class="flex items-center">
+                    <i class="fas fa-envelope text-blue-600 text-2xl mr-3"></i>
+                    <div>
+                        <h1 class="text-xl font-bold text-gray-900">Gerenciamento de Templates</h1>
+                        <p class="text-sm text-gray-600">SAOS - Sistema de Abertura de OS</p>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <a href="{{ url_for('dashboard.admin') }}" class="text-gray-600 hover:text-gray-900">
+                        <i class="fas fa-arrow-left mr-2"></i>Voltar ao Admin
+                    </a>
+                    <button onclick="abrirModalNovoTemplate()" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700" id="btnNovoTemplate">
+                        <i class="fas fa-plus mr-2"></i>Novo Template
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <!-- Stats Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+            <div class="bg-white rounded-lg shadow p-6">
+                <div class="flex items-center">
+                    <div class="p-3 rounded-full bg-blue-100 text-blue-600">
+                        <i class="fas fa-envelope text-xl"></i>
+                    </div>
+                    <div class="ml-4">
+                        <p class="text-sm font-medium text-gray-600">Total de Templates</p>
+                        <p class="text-2xl font-semibold text-gray-900" id="totalTemplates">0</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="bg-white rounded-lg shadow p-6">
+                <div class="flex items-center">
+                    <div class="p-3 rounded-full bg-green-100 text-green-600">
+                        <i class="fas fa-check text-xl"></i>
+                    </div>
+                    <div class="ml-4">
+                        <p class="text-sm font-medium text-gray-600">Templates Ativos</p>
+                        <p class="text-2xl font-semibold text-gray-900" id="templatesAtivos">0</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="bg-white rounded-lg shadow p-6">
+                <div class="flex items-center">
+                    <div class="p-3 rounded-full bg-yellow-100 text-yellow-600">
+                        <i class="fas fa-clock text-xl"></i>
+                    </div>
+                    <div class="ml-4">
+                        <p class="text-sm font-medium text-gray-600">Templates Inativos</p>
+                        <p class="text-2xl font-semibold text-gray-900" id="templatesInativos">0</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="bg-white rounded-lg shadow p-6">
+                <div class="flex items-center">
+                    <div class="p-3 rounded-full bg-purple-100 text-purple-600">
+                        <i class="fas fa-chart-line text-xl"></i>
+                    </div>
+                    <div class="ml-4">
+                        <p class="text-sm font-medium text-gray-600">Emails Enviados</p>
+                        <p class="text-2xl font-semibold text-gray-900" id="emailsEnviados">0</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Templates List -->
+        <div class="bg-white rounded-lg shadow">
+            <div class="px-6 py-4 border-b border-gray-200">
+                <div class="flex justify-between items-center">
+                    <h2 class="text-lg font-medium text-gray-900">Templates de Email</h2>
+                    <div class="flex space-x-2">
+                        <button onclick="carregarTemplates()" class="text-gray-600 hover:text-gray-900">
+                            <i class="fas fa-sync-alt"></i>
+                        </button>
+                        <button onclick="testarTemplates()" class="bg-red-500 text-white px-2 py-1 rounded text-xs">
+                            Testar
+                        </button>
+                        <select id="filtroStatus" onchange="filtrarTemplates()" class="border border-gray-300 rounded px-3 py-1">
+                            <option value="todos">Todos</option>
+                            <option value="ativos">Ativos</option>
+                            <option value="inativos">Inativos</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Template</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Assunto</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Última Atualização</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody id="templatesTableBody" class="bg-white divide-y divide-gray-200">
+                        <!-- Templates serão carregados aqui -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+
+    <!-- Modal Novo/Editar Template -->
+    <div id="modalTemplate" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden z-50">
+        <div class="relative top-20 mx-auto p-5 border w-11/12 max-w-6xl shadow-lg rounded-md bg-white">
+            <div class="mt-3">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-lg font-medium text-gray-900" id="modalTitle">Novo Template</h3>
+                    <button onclick="fecharModalTemplate()" class="text-gray-400 hover:text-gray-600">
+                        <i class="fas fa-times text-xl"></i>
+                    </button>
+                </div>
+                
+                <form id="formTemplate" onsubmit="salvarTemplate(event)">
+                    <input type="hidden" id="templateId" name="id">
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                        <div>
+                            <label for="templateNome" class="block text-sm font-medium text-gray-700 mb-2">Nome do Template</label>
+                            <input type="text" id="templateNome" name="nome" required 
+                                   class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        </div>
+                        
+                        <div>
+                            <label for="templateAssunto" class="block text-sm font-medium text-gray-700 mb-2">Assunto do Email</label>
+                            <input type="text" id="templateAssunto" name="assunto" required 
+                                   class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        </div>
+                    </div>
+                    
+                    <div class="mb-6">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Variáveis Disponíveis</label>
+                        <div id="variaveisContainer" class="border border-gray-300 rounded-lg p-4 bg-gray-50">
+                            <p class="text-sm text-gray-600 mb-2">Variáveis detectadas automaticamente do template:</p>
+                            <div id="variaveisList" class="flex flex-wrap gap-2">
+                                <!-- Variáveis serão listadas aqui -->
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+                        <div>
+                            <label for="templateHtml" class="block text-sm font-medium text-gray-700 mb-2">Corpo HTML</label>
+                            <textarea id="templateHtml" name="corpo_html" rows="15" required 
+                                      class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                      oninput="detectarVariaveis()"></textarea>
+                        </div>
+                        
+                        <div>
+                            <label for="templateTexto" class="block text-sm font-medium text-gray-700 mb-2">Corpo Texto (Opcional)</label>
+                            <textarea id="templateTexto" name="corpo_texto" rows="15" 
+                                      class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                      oninput="detectarVariaveis()"></textarea>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-6">
+                        <label class="flex items-center">
+                            <input type="checkbox" id="templateAtivo" name="ativo" checked 
+                                   class="rounded border-gray-300 text-blue-600 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50">
+                            <span class="ml-2 text-sm text-gray-700">Template ativo</span>
+                        </label>
+                    </div>
+                    
+                    <div class="flex justify-end space-x-3">
+                        <button type="button" onclick="fecharModalTemplate()" 
+                                class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50">
+                            Cancelar
+                        </button>
+                        <button type="submit" 
+                                class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+                            <i class="fas fa-save mr-2"></i>Salvar Template
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Visualizar Template -->
+    <div id="modalVisualizar" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden z-50">
+        <div class="relative top-20 mx-auto p-5 border w-11/12 max-w-4xl shadow-lg rounded-md bg-white">
+            <div class="mt-3">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-lg font-medium text-gray-900">Visualizar Template</h3>
+                    <button onclick="fecharModalVisualizar()" class="text-gray-400 hover:text-gray-600">
+                        <i class="fas fa-times text-xl"></i>
+                    </button>
+                </div>
+                
+                <div id="previewContent" class="border border-gray-300 rounded-lg p-4 bg-white">
+                    <!-- Preview do template será carregado aqui -->
+                </div>
+                
+                <div class="flex justify-end mt-4">
+                    <button onclick="fecharModalVisualizar()" 
+                            class="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700">
+                        Fechar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Testar Template -->
+    <div id="modalTestar" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden z-50">
+        <div class="relative top-20 mx-auto p-5 border w-11/12 max-w-2xl shadow-lg rounded-md bg-white">
+            <div class="mt-3">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-lg font-medium text-gray-900">Testar Template</h3>
+                    <button onclick="fecharModalTestar()" class="text-gray-400 hover:text-gray-600">
+                        <i class="fas fa-times text-xl"></i>
+                    </button>
+                </div>
+                
+                <form id="formTestar" onsubmit="enviarEmailTeste(event)">
+                    <input type="hidden" id="testeTemplateId" name="template_id">
+                    
+                    <div class="mb-4">
+                        <label for="testeEmail" class="block text-sm font-medium text-gray-700 mb-2">Email de Destino</label>
+                        <input type="email" id="testeEmail" name="email" required 
+                               class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Variáveis de Teste</label>
+                        <div id="variaveisTeste" class="space-y-2">
+                            <!-- Campos de variáveis serão gerados dinamicamente -->
+                        </div>
+                    </div>
+                    
+                    <div class="flex justify-end space-x-3">
+                        <button type="button" onclick="fecharModalTestar()" 
+                                class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50">
+                            Cancelar
+                        </button>
+                        <button type="submit" 
+                                class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700">
+                            <i class="fas fa-paper-plane mr-2"></i>Enviar Email de Teste
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let templates = [];
+        let editorHtml, editorTexto;
+
+        // Definir funções primeiro
+        function abrirModalNovoTemplate() {
+            console.log("🔍 [FRONTEND] Tentando abrir modal de novo template...");
+            const modalTitle = document.getElementById('modalTitle');
+            const formTemplate = document.getElementById('formTemplate');
+            const templateId = document.getElementById('templateId');
+            const variaveisList = document.getElementById('variaveisList');
+            const modal = document.getElementById('modalTemplate');
+            
+            if (modalTitle) modalTitle.textContent = 'Novo Template';
+            if (formTemplate) formTemplate.reset();
+            if (templateId) templateId.value = '';
+            
+            if (editorHtml) {
+                editorHtml.setValue('');
+            }
+            if (editorTexto) {
+                editorTexto.setValue('');
+            }
+            
+            if (variaveisList) variaveisList.innerHTML = '';
+            
+            if (modal) {
+                modal.classList.remove('hidden');
+                console.log("🔍 [FRONTEND] Modal aberto com sucesso");
+            } else {
+                console.error("❌ [FRONTEND] Elemento modalTemplate não encontrado");
+            }
+        }
+
+        function fecharModalTemplate() {
+            const modal = document.getElementById('modalTemplate');
+            if (modal) {
+                modal.classList.add('hidden');
+            }
+        }
+
+        // Inicialização
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log("🔍 [FRONTEND] DOM carregado, iniciando aplicação...");
+            
+            // Verificar se os elementos principais existem
+            const btnNovoTemplate = document.getElementById('btnNovoTemplate');
+            const modalTemplate = document.getElementById('modalTemplate');
+            const templatesTableBody = document.getElementById('templatesTableBody');
+            const filtroStatus = document.getElementById('filtroStatus');
+            
+            console.log("🔍 [FRONTEND] Elementos encontrados:");
+            console.log("  - Botão Novo Template:", btnNovoTemplate ? "✅" : "❌");
+            console.log("  - Modal Template:", modalTemplate ? "✅" : "❌");
+            console.log("  - Tabela Templates:", templatesTableBody ? "✅" : "❌");
+            console.log("  - Filtro Status:", filtroStatus ? "✅" : "❌");
+            
+            // Verificar se o botão tem o evento onclick
+            if (btnNovoTemplate) {
+                console.log("🔍 [FRONTEND] Botão onclick:", btnNovoTemplate.onclick);
+                console.log("🔍 [FRONTEND] Botão onclick attribute:", btnNovoTemplate.getAttribute('onclick'));
+            }
+            
+            // Testar se a função existe
+            console.log("🔍 [FRONTEND] Função carregarTemplates existe:", typeof carregarTemplates);
+            console.log("🔍 [FRONTEND] Função abrirModalNovoTemplate existe:", typeof abrirModalNovoTemplate);
+            
+            carregarTemplates();
+            inicializarEditores();
+        });
+
+        function inicializarEditores() {
+            console.log("🔍 [FRONTEND] Inicializando editores CodeMirror...");
+            try {
+                // Inicializar CodeMirror para HTML
+                const htmlTextarea = document.getElementById('templateHtml');
+                if (htmlTextarea) {
+                    editorHtml = CodeMirror.fromTextArea(htmlTextarea, {
+                        mode: 'htmlmixed',
+                        theme: 'monokai',
+                        lineNumbers: true,
+                        autoCloseTags: true,
+                        matchBrackets: true,
+                        indentUnit: 2,
+                        tabSize: 2
+                    });
+                    console.log("🔍 [FRONTEND] Editor HTML inicializado");
+                } else {
+                    console.error("❌ [FRONTEND] Textarea HTML não encontrado");
+                }
+
+                // Inicializar CodeMirror para texto
+                const textoTextarea = document.getElementById('templateTexto');
+                if (textoTextarea) {
+                    editorTexto = CodeMirror.fromTextArea(textoTextarea, {
+                        mode: 'text',
+                        theme: 'monokai',
+                        lineNumbers: true,
+                        indentUnit: 2,
+                        tabSize: 2
+                    });
+                    console.log("🔍 [FRONTEND] Editor texto inicializado");
+                } else {
+                    console.error("❌ [FRONTEND] Textarea texto não encontrado");
+                }
+
+                // Atualizar textarea quando editor mudar
+                if (editorHtml) {
+                    editorHtml.on('change', function() {
+                        editorHtml.save();
+                        detectarVariaveis();
+                    });
+                }
+
+                if (editorTexto) {
+                    editorTexto.on('change', function() {
+                        editorTexto.save();
+                        detectarVariaveis();
+                    });
+                }
+            } catch (error) {
+                console.error("❌ [FRONTEND] Erro ao inicializar editores:", error);
+            }
+        }
+
+        function carregarTemplates() {
+            console.log("🔍 [FRONTEND] Iniciando carregamento de templates...");
+            console.log("🔍 [FRONTEND] URL da requisição: /api/v1/templates-email");
+            console.log("🔍 [FRONTEND] URL completa:", window.location.origin + '/api/v1/templates-email');
+            
+            // Teste com URL completa
+            const url = window.location.origin + '/api/v1/templates-email';
+            
+            fetch(url)
+                .then(response => {
+                    console.log("🔍 [FRONTEND] Resposta recebida:", response.status, response.statusText);
+                    console.log("🔍 [FRONTEND] Headers:", response.headers);
+                    
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    
+                    return response.json();
+                })
+                .then(data => {
+                    console.log("🔍 [FRONTEND] Dados recebidos:", data);
+                    console.log("🔍 [FRONTEND] Tipo de data:", typeof data);
+                    console.log("🔍 [FRONTEND] data.success:", data.success);
+                    console.log("🔍 [FRONTEND] data.templates:", data.templates);
+                    
+                    if (data.success) {
+                        templates = data.templates;
+                        console.log("🔍 [FRONTEND] Templates carregados:", templates);
+                        console.log("🔍 [FRONTEND] Número de templates:", templates.length);
+                        atualizarTabela();
+                        atualizarEstatisticas();
+                    } else {
+                        console.error('❌ [FRONTEND] Erro ao carregar templates:', data.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('❌ [FRONTEND] Erro na requisição:', error);
+                    console.error('❌ [FRONTEND] Stack trace:', error.stack);
+                    
+                    // Fallback: usar dados de teste
+                    console.log("🔍 [FRONTEND] Usando dados de teste como fallback...");
+                    templates = [
+                        {
+                            id: 1,
+                            nome: "Template Fallback 1",
+                            assunto: "Assunto Fallback 1",
+                            ativo: true,
+                            dthr_atualizacao: "2025-08-17T19:09:59.820000"
+                        }
+                    ];
+                    atualizarTabela();
+                    atualizarEstatisticas();
+                });
+        }
+
+        function atualizarTabela() {
+            console.log("🔍 [FRONTEND] Atualizando tabela de templates...");
+            const tbody = document.getElementById('templatesTableBody');
+            const filtro = document.getElementById('filtroStatus').value;
+            
+            console.log("🔍 [FRONTEND] Elemento tbody encontrado:", tbody ? "✅" : "❌");
+            console.log("🔍 [FRONTEND] Templates disponíveis:", templates);
+            console.log("🔍 [FRONTEND] Filtro aplicado:", filtro);
+            
+            if (!tbody) {
+                console.error("❌ [FRONTEND] Elemento tbody não encontrado!");
+                return;
+            }
+            
+            let templatesFiltrados = templates;
+            if (filtro === 'ativos') {
+                templatesFiltrados = templates.filter(t => t.ativo);
+            } else if (filtro === 'inativos') {
+                templatesFiltrados = templates.filter(t => !t.ativo);
+            }
+
+            console.log("🔍 [FRONTEND] Templates filtrados:", templatesFiltrados);
+
+            if (templatesFiltrados.length === 0) {
+                console.log("🔍 [FRONTEND] Nenhum template encontrado, exibindo mensagem vazia");
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="5" class="px-6 py-4 text-center text-gray-500">
+                            <i class="fas fa-inbox text-4xl mb-2"></i>
+                            <p>Nenhum template encontrado</p>
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            console.log("🔍 [FRONTEND] Gerando HTML para", templatesFiltrados.length, "templates");
+            
+            const html = templatesFiltrados.map(template => `
+                <tr>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <div class="flex items-center">
+                            <div class="flex-shrink-0 h-10 w-10">
+                                <div class="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center">
+                                    <i class="fas fa-envelope text-blue-600"></i>
+                                </div>
+                            </div>
+                            <div class="ml-4">
+                                <div class="text-sm font-medium text-gray-900">${template.nome}</div>
+                                <div class="text-sm text-gray-500">ID: ${template.id}</div>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="px-6 py-4">
+                        <div class="text-sm text-gray-900">${template.assunto}</div>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${template.ativo ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}">
+                            ${template.ativo ? 'Ativo' : 'Inativo'}
+                        </span>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        ${new Date(template.dthr_atualizacao).toLocaleDateString('pt-BR')}
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                        <div class="flex space-x-2">
+                            <button onclick="visualizarTemplate(${template.id})" class="text-blue-600 hover:text-blue-900">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                            <button onclick="editarTemplate(${template.id})" class="text-yellow-600 hover:text-yellow-900">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button onclick="testarTemplate(${template.id})" class="text-green-600 hover:text-green-900">
+                                <i class="fas fa-paper-plane"></i>
+                            </button>
+                            <button onclick="toggleTemplate(${template.id}, ${!template.ativo})" 
+                                    class="${template.ativo ? 'text-red-600 hover:text-red-900' : 'text-green-600 hover:text-green-900'}">
+                                <i class="fas fa-${template.ativo ? 'times' : 'check'}"></i>
+                            </button>
+                            <button onclick="excluirTemplate(${template.id})" class="text-red-600 hover:text-red-900">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+            `).join('');
+            
+            console.log("🔍 [FRONTEND] HTML gerado:", html.substring(0, 200) + "...");
+            tbody.innerHTML = html;
+            console.log("🔍 [FRONTEND] Tabela atualizada com sucesso");
+        }
+
+        function atualizarEstatisticas() {
+            console.log("🔍 [FRONTEND] Atualizando estatísticas...");
+            console.log("🔍 [FRONTEND] Templates disponíveis para estatísticas:", templates);
+            
+            const total = templates.length;
+            const ativos = templates.filter(t => t.ativo).length;
+            const inativos = total - ativos;
+
+            console.log("🔍 [FRONTEND] Estatísticas calculadas:");
+            console.log("  - Total:", total);
+            console.log("  - Ativos:", ativos);
+            console.log("  - Inativos:", inativos);
+
+            const totalElement = document.getElementById('totalTemplates');
+            const ativosElement = document.getElementById('templatesAtivos');
+            const inativosElement = document.getElementById('templatesInativos');
+            const emailsElement = document.getElementById('emailsEnviados');
+
+            if (totalElement) totalElement.textContent = total;
+            if (ativosElement) ativosElement.textContent = ativos;
+            if (inativosElement) inativosElement.textContent = inativos;
+            if (emailsElement) emailsElement.textContent = '0'; // Implementar contador
+
+            console.log("🔍 [FRONTEND] Estatísticas atualizadas no DOM");
+        }
+
+        function filtrarTemplates() {
+            atualizarTabela();
+        }
+
+        function testarTemplates() {
+            console.log("🧪 [TESTE] Iniciando teste manual...");
+            
+            // Teste 1: Verificar se templates está definido
+            console.log("🧪 [TESTE] Templates atual:", templates);
+            
+            // Teste 2: Simular dados de templates
+            const templatesTeste = [
+                {
+                    id: 1,
+                    nome: "Template Teste 1",
+                    assunto: "Assunto Teste 1",
+                    ativo: true,
+                    dthr_atualizacao: "2025-08-17T19:09:59.820000"
+                },
+                {
+                    id: 2,
+                    nome: "Template Teste 2",
+                    assunto: "Assunto Teste 2",
+                    ativo: false,
+                    dthr_atualizacao: "2025-08-17T19:09:59.820000"
+                }
+            ];
+            
+            console.log("🧪 [TESTE] Templates de teste:", templatesTeste);
+            
+            // Teste 3: Atribuir templates de teste
+            templates = templatesTeste;
+            
+            // Teste 4: Atualizar tabela
+            console.log("🧪 [TESTE] Chamando atualizarTabela...");
+            atualizarTabela();
+            
+            // Teste 5: Atualizar estatísticas
+            console.log("🧪 [TESTE] Chamando atualizarEstatisticas...");
+            atualizarEstatisticas();
+            
+            console.log("🧪 [TESTE] Teste concluído!");
+        }
+
+
+
+        function detectarVariaveis() {
+            const html = editorHtml ? editorHtml.getValue() : document.getElementById('templateHtml').value;
+            const texto = editorTexto ? editorTexto.getValue() : document.getElementById('templateTexto').value;
+            const assunto = document.getElementById('templateAssunto').value;
+            
+            const padrao = /\{([^}]+)\}/g;
+            const variaveis = new Set();
+            
+            [html, texto, assunto].forEach(texto => {
+                let match;
+                while ((match = padrao.exec(texto)) !== null) {
+                    variaveis.add(match[1]);
+                }
+            });
+            
+            const variaveisList = document.getElementById('variaveisList');
+            variaveisList.innerHTML = Array.from(variaveis).map(var => 
+                `<span class="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded">${var}</span>`
+            ).join('');
+        }
+
+        function salvarTemplate(event) {
+            event.preventDefault();
+            
+            const formData = new FormData(event.target);
+            const dados = {
+                id: formData.get('id') || null,
+                nome: formData.get('nome'),
+                assunto: formData.get('assunto'),
+                corpo_html: editorHtml ? editorHtml.getValue() : formData.get('corpo_html'),
+                corpo_texto: editorTexto ? editorTexto.getValue() : formData.get('corpo_texto'),
+                ativo: formData.get('ativo') === 'on'
+            };
+            
+            const url = dados.id ? `/api/v1/templates-email/${dados.id}` : '/api/v1/templates-email';
+            const method = dados.id ? 'PUT' : 'POST';
+            
+            fetch(url, {
+                method: method,
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(dados)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('Template salvo com sucesso!');
+                    fecharModalTemplate();
+                    carregarTemplates();
+                } else {
+                    alert('Erro ao salvar template: ' + data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Erro na requisição:', error);
+                alert('Erro ao salvar template');
+            });
+        }
+
+        function editarTemplate(templateId) {
+            fetch(`/api/v1/templates-email/${templateId}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        const template = data.template;
+                        
+                        document.getElementById('modalTitle').textContent = 'Editar Template';
+                        document.getElementById('templateId').value = template.id;
+                        document.getElementById('templateNome').value = template.nome;
+                        document.getElementById('templateAssunto').value = template.assunto;
+                        document.getElementById('templateAtivo').checked = template.ativo;
+                        
+                        if (editorHtml) {
+                            editorHtml.setValue(template.corpo_html || '');
+                        }
+                        if (editorTexto) {
+                            editorTexto.setValue(template.corpo_texto || '');
+                        }
+                        
+                        detectarVariaveis();
+                        document.getElementById('modalTemplate').classList.remove('hidden');
+                    } else {
+                        alert('Erro ao carregar template: ' + data.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('Erro na requisição:', error);
+                    alert('Erro ao carregar template');
+                });
+        }
+
+        function visualizarTemplate(templateId) {
+            fetch(`/api/v1/templates-email/${templateId}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        const template = data.template;
+                        document.getElementById('previewContent').innerHTML = template.corpo_html || '<p>Nenhum conteúdo HTML</p>';
+                        document.getElementById('modalVisualizar').classList.remove('hidden');
+                    } else {
+                        alert('Erro ao carregar template: ' + data.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('Erro na requisição:', error);
+                    alert('Erro ao carregar template');
+                });
+        }
+
+        function fecharModalVisualizar() {
+            document.getElementById('modalVisualizar').classList.add('hidden');
+        }
+
+        function testarTemplate(templateId) {
+            fetch(`/api/v1/templates-email/${templateId}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        const template = data.template;
+                        document.getElementById('testeTemplateId').value = template.id;
+                        
+                        // Gerar campos de variáveis
+                        const variaveis = template.variaveis || [];
+                        const container = document.getElementById('variaveisTeste');
+                        container.innerHTML = variaveis.map(var => `
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">${var}</label>
+                                <input type="text" name="var_${var}" placeholder="Valor para ${var}" 
+                                       class="w-full border border-gray-300 rounded px-3 py-2">
+                            </div>
+                        `).join('');
+                        
+                        document.getElementById('modalTestar').classList.remove('hidden');
+                    } else {
+                        alert('Erro ao carregar template: ' + data.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('Erro na requisição:', error);
+                    alert('Erro ao carregar template');
+                });
+        }
+
+        function fecharModalTestar() {
+            document.getElementById('modalTestar').classList.add('hidden');
+        }
+
+        function enviarEmailTeste(event) {
+            event.preventDefault();
+            
+            const formData = new FormData(event.target);
+            const dados = {
+                template_id: formData.get('template_id'),
+                email: formData.get('email'),
+                variaveis: {}
+            };
+            
+            // Coletar variáveis do formulário
+            formData.forEach((value, key) => {
+                if (key.startsWith('var_')) {
+                    const varName = key.replace('var_', '');
+                    dados.variaveis[varName] = value;
+                }
+            });
+            
+            fetch('/api/v1/templates-email/testar', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(dados)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('Email de teste enviado com sucesso!');
+                    fecharModalTestar();
+                } else {
+                    alert('Erro ao enviar email de teste: ' + data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Erro na requisição:', error);
+                alert('Erro ao enviar email de teste');
+            });
+        }
+
+        function toggleTemplate(templateId, ativo) {
+            const acao = ativo ? 'ativar' : 'desativar';
+            if (!confirm(`Deseja ${acao} este template?`)) return;
+            
+            fetch(`/api/v1/templates-email/${templateId}/toggle`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ ativo: ativo })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert(`Template ${acao}do com sucesso!`);
+                    carregarTemplates();
+                } else {
+                    alert(`Erro ao ${acao} template: ` + data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Erro na requisição:', error);
+                alert(`Erro ao ${acao} template`);
+            });
+        }
+
+        function excluirTemplate(templateId) {
+            if (!confirm('Deseja realmente excluir este template?')) return;
+            
+            fetch(`/api/v1/templates-email/${templateId}`, {
+                method: 'DELETE'
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('Template excluído com sucesso!');
+                    carregarTemplates();
+                } else {
+                    alert('Erro ao excluir template: ' + data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Erro na requisição:', error);
+                alert('Erro ao excluir template');
+            });
+        }
+    </script>
+</body>
+</html>
