@@ -28,7 +28,7 @@ class BaseModel:
             query += f" ORDER BY {order_by}"
         
         if limit:
-            query += f" LIMIT {limit}"
+            query += f" FIRST {limit}"
         
         with db_connection() as con:
             cur = con.cursor()

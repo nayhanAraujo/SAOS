@@ -1,525 +1,241 @@
-# 📧 Guia Completo - Sistema de Templates de Email SAOS
+# 📧 Guia de Templates de Email - SAOS
 
-## 📋 Índice
+## Visão Geral
 
-1. [Visão Geral](#visão-geral)
-2. [Arquitetura do Sistema](#arquitetura-do-sistema)
-3. [Estrutura da Tabela TEMPLATES_EMAIL](#estrutura-da-tabela-templates_email)
-4. [Tipos de Templates](#tipos-de-templates)
-5. [Variáveis Disponíveis](#variáveis-disponíveis)
-6. [Como Usar](#como-usar)
-7. [Interface Administrativa](#interface-administrativa)
-8. [Exemplos Práticos](#exemplos-práticos)
-9. [Configuração](#configuração)
-10. [Troubleshooting](#troubleshooting)
+O sistema SAOS utiliza templates de email personalizados para enviar notificações aos clientes. O template padrão para confirmação de abertura de solicitações é baseado no arquivo `template1.html`.
 
-## 🎯 Visão Geral
+## 🎨 Template Padrão (template1.html)
 
-O Sistema de Templates de Email do SAOS permite criar, gerenciar e usar templates de email personalizados para diferentes cenários do sistema. Os templates suportam variáveis dinâmicas que são substituídas automaticamente com dados específicos de cada situação.
+### Características
+- **Design responsivo** com CSS inline
+- **Cores da Medware** (azul #0056b3)
+- **Fonte Roboto** para melhor legibilidade
+- **Layout profissional** com header, conteúdo e footer
 
-### **Principais Benefícios:**
+### Variáveis Disponíveis
 
-- ✅ **Padronização**: Emails consistentes com a identidade visual
-- ✅ **Automação**: Envio automático baseado em eventos do sistema
-- ✅ **Personalização**: Variáveis dinâmicas para conteúdo contextual
-- ✅ **Flexibilidade**: Templates HTML e texto plano
-- ✅ **Gerenciamento**: Interface administrativa completa
+| Variável | Descrição | Exemplo |
+|----------|-----------|---------|
+| `{nome_cliente}` | Nome do cliente | "Dr. João Silva" |
+| `{codigo_referencia}` | Código da solicitação | "OS20241201001" |
+| `{data_hora}` | Data e hora da criação | "01/12/2024 - 14:30" |
+| `{tipo_solicitacao}` | Tipo da solicitação | "Problema de Acesso" |
+| `{sistema}` | Sistema relacionado | "Sistema Principal" |
+| `{prazo_estimado}` | Prazo estimado | "3 dias úteis" |
+| `{link_acompanhamento}` | Link para acompanhar | "http://localhost:5001/acompanhar/..." |
 
-## 🏗️ Arquitetura do Sistema
+### Estrutura do Email
 
 ```
-┌─────────────────┐    ┌──────────────────┐    ┌─────────────────┐
-│   Frontend      │    │   API Routes     │    │   Database      │
-│                 │    │                  │    │                 │
-│ - Admin Panel   │◄──►│ - CRUD Templates │◄──►│ - TEMPLATES_EMAIL│
-│ - Template Mgmt │    │ - Email Testing  │    │ - CONFIGURACOES │
-│ - Preview       │    │ - Validation     │    │                 │
-└─────────────────┘    └──────────────────┘    └─────────────────┘
-                                │
-                                ▼
-                       ┌──────────────────┐
-                       │   Email Service  │
-                       │                  │
-                       │ - SMTP Config    │
-                       │ - Template Engine│
-                       │ - Variable Sub   │
-                       └──────────────────┘
+┌─────────────────────────────────────┐
+│           MEDWARE SISTEMAS          │
+│         Solicitação Registrada      │
+├─────────────────────────────────────┤
+│ Olá, [Nome do Cliente],             │
+│                                     │
+│ Sua solicitação foi recebida...     │
+│                                     │
+│ ┌─────────────────────────────────┐ │
+│ │ Nº da Solicitação: OS2024...   │ │
+│ │ Status Atual: Em análise       │ │
+│ │ Data/Hora: 01/12/2024 - 14:30  │ │
+│ │ Tipo: Problema de Acesso       │ │
+│ │ Sistema: Sistema Principal     │ │
+│ │ Prazo Estimado: 3 dias úteis   │ │
+│ └─────────────────────────────────┘ │
+│                                     │
+│ [Acompanhar Solicitação] [WhatsApp] │
+│                                     │
+│ Atenciosamente,                     │
+│ Equipe de Suporte Medware           │
+├─────────────────────────────────────┤
+│ Canais de Atendimento               │
+│ www.medware.com.br                  │
+│ (61) 3301 6575                      │
+└─────────────────────────────────────┘
 ```
 
-### **Componentes Principais:**
+## 🔧 Implementação Técnica
 
-1. **EmailTemplateManager**: Gerenciador principal de templates
-2. **EmailService**: Serviço de envio de emails
-3. **API Routes**: Endpoints para CRUD de templates
-4. **Admin Interface**: Interface web para gerenciamento
-5. **Database**: Armazenamento de templates e configurações
+### Classe EmailService
 
-## 📊 Estrutura da Tabela TEMPLATES_EMAIL
-
-```sql
-CREATE TABLE TEMPLATES_EMAIL (
-    ID INTEGER GENERATED BY DEFAULT AS IDENTITY PRIMARY KEY,
-    NOME VARCHAR(100) NOT NULL,                    -- Nome único do template
-    ASSUNTO VARCHAR(200) NOT NULL,                 -- Assunto do email
-    CORPO_HTML BLOB NOT NULL,                      -- Conteúdo HTML
-    CORPO_TEXTO BLOB,                              -- Conteúdo texto plano (opcional)
-    VARIAVEIS BLOB,                                -- JSON com variáveis disponíveis
-    ATIVO BOOLEAN DEFAULT TRUE,                    -- Status do template
-    DTHR_CRIACAO TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    DTHR_ATUALIZACAO TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-```
-
-### **Campos Detalhados:**
-
-- **NOME**: Identificador único do template (ex: `confirmacao_abertura`)
-- **ASSUNTO**: Assunto do email com suporte a variáveis
-- **CORPO_HTML**: Conteúdo HTML completo do email
-- **CORPO_TEXTO**: Versão texto plano (para clientes que não suportam HTML)
-- **VARIAVEIS**: Array JSON com nomes das variáveis disponíveis
-- **ATIVO**: Controla se o template está disponível para uso
-
-## 📧 Tipos de Templates
-
-### **1. Confirmação de Abertura**
-- **Nome**: `confirmacao_abertura`
-- **Uso**: Enviado quando uma nova solicitação é criada
-- **Destinatário**: Cliente
-- **Variáveis**: `codigo_referencia`, `nome_cliente`, `titulo`, `categoria`, `prioridade`, `prazo_estimado`, `descricao`, `link_acompanhamento`
-
-### **2. Atualização de Status**
-- **Nome**: `atualizacao_status`
-- **Uso**: Enviado quando o status da solicitação é alterado
-- **Destinatário**: Cliente
-- **Variáveis**: `codigo_referencia`, `nome_cliente`, `novo_status`, `cor_status`, `responsavel`, `data_atualizacao`, `comentario`, `link_acompanhamento`
-
-### **3. Solicitação de Informações**
-- **Nome**: `solicitacao_informacoes`
-- **Uso**: Enviado quando o técnico precisa de informações adicionais
-- **Destinatário**: Cliente
-- **Variáveis**: `codigo_referencia`, `nome_cliente`, `titulo`, `responsavel`, `informacoes_necessarias`, `link_atualizacao`
-
-### **4. Resolução Concluída**
-- **Nome**: `resolucao_concluida`
-- **Uso**: Enviado quando a solicitação é resolvida
-- **Destinatário**: Cliente
-- **Variáveis**: `codigo_referencia`, `nome_cliente`, `titulo`, `solucao`, `responsavel`, `data_resolucao`, `tempo_resolucao`, `link_avaliacao`
-
-### **5. Lembrete de Prazo**
-- **Nome**: `lembrete_prazo`
-- **Uso**: Enviado quando o prazo está próximo de expirar
-- **Destinatário**: Cliente/Técnico
-- **Variáveis**: `codigo_referencia`, `nome_cliente`, `titulo`, `prazo_limite`, `tempo_restante`, `responsavel`, `link_acompanhamento`
-
-### **6. Escalação para Técnico**
-- **Nome**: `escalacao_tecnico`
-- **Uso**: Enviado quando uma solicitação é atribuída a um técnico
-- **Destinatário**: Técnico
-- **Variáveis**: `codigo_referencia`, `nome_cliente`, `titulo`, `categoria`, `prioridade`, `descricao`, `prazo_limite`, `link_solicitacao`
-
-## 🔧 Variáveis Disponíveis
-
-### **Variáveis de Solicitação:**
-- `{codigo_referencia}` - Código único da solicitação
-- `{titulo}` - Título da solicitação
-- `{descricao}` - Descrição detalhada
-- `{categoria}` - Nome da categoria
-- `{prioridade}` - Nome da prioridade
-- `{prazo_estimado}` - Prazo estimado formatado
-- `{prazo_limite}` - Prazo limite formatado
-
-### **Variáveis de Usuário:**
-- `{nome_cliente}` - Nome do cliente
-- `{email_cliente}` - Email do cliente
-- `{responsavel}` - Nome do técnico responsável
-- `{tecnico_email}` - Email do técnico
-
-### **Variáveis de Status:**
-- `{novo_status}` - Nome do novo status
-- `{cor_status}` - Cor do status (para HTML)
-- `{data_atualizacao}` - Data/hora da atualização
-
-### **Variáveis de Sistema:**
-- `{link_acompanhamento}` - Link para acompanhar a solicitação
-- `{link_atualizacao}` - Link para atualizar a solicitação
-- `{link_avaliacao}` - Link para avaliar o serviço
-- `{link_solicitacao}` - Link direto para a solicitação
-- `{link_dashboard}` - Link para o dashboard
-
-### **Variáveis de Tempo:**
-- `{data_resolucao}` - Data/hora da resolução
-- `{tempo_resolucao}` - Tempo total de resolução
-- `{tempo_restante}` - Tempo restante até o prazo
-
-### **Variáveis Customizadas:**
-- `{comentario}` - Comentário adicional
-- `{solucao}` - Solução aplicada
-- `{informacoes_necessarias}` - Informações solicitadas
-
-## 🚀 Como Usar
-
-### **1. Uso Básico**
+O template é implementado na classe `EmailService` no arquivo `utils/email_service.py`:
 
 ```python
-from utils.email_template_manager import EmailTemplateManager
+def get_template1_html(self, variaveis):
+    """Retorna o template template1.html com as variáveis substituídas"""
+    template_html = '''<!DOCTYPE html>
+    <html lang="pt-BR">
+    <!-- Template HTML completo -->
+    </html>'''
+    
+    return self._substituir_variaveis(template_html, variaveis)
 
-# Inicializar o gerenciador
-template_manager = EmailTemplateManager()
+def enviar_confirmacao_abertura(self, solicitacao_id):
+    """Envia email de confirmação usando template1.html"""
+    # Busca dados da solicitação
+    # Prepara variáveis
+    # Gera HTML com template1.html
+    # Envia email
+```
 
-# Preparar variáveis
+### Fluxo de Envio
+
+1. **Cliente submete formulário** (`form.html`)
+2. **Sistema cria solicitação** no banco de dados
+3. **Função `enviar_email_confirmacao()`** é chamada
+4. **EmailService** busca dados da solicitação
+5. **Template1.html** é processado com variáveis
+6. **Email é enviado** para o cliente
+
+### Configuração de Email
+
+As configurações de email são carregadas do banco de dados:
+
+```sql
+SELECT CHAVE, VALOR FROM CONFIGURACOES WHERE CHAVE LIKE 'EMAIL_%'
+```
+
+Configurações necessárias:
+- `EMAIL_SMTP_HOST`: Servidor SMTP
+- `EMAIL_SMTP_PORT`: Porta SMTP
+- `EMAIL_SMTP_USER`: Usuário SMTP
+- `EMAIL_SMTP_PASS`: Senha SMTP
+- `EMAIL_FROM`: Email remetente
+
+## 🧪 Testes
+
+### Script de Teste
+
+Execute o script de teste para verificar se o template está funcionando:
+
+```bash
+python scripts/test_email_template.py
+```
+
+O script irá:
+1. Criar uma solicitação de teste
+2. Enviar email usando template1.html
+3. Verificar substituição de variáveis
+4. Gerar arquivo HTML de exemplo
+
+### Verificação Manual
+
+1. **Acesse o sistema** e crie uma nova solicitação
+2. **Verifique o email** recebido
+3. **Confirme se o layout** está correto
+4. **Teste os links** de acompanhamento
+
+## 🎨 Personalização
+
+### Alterando Cores
+
+Para alterar as cores do template, edite as variáveis CSS no método `get_template1_html()`:
+
+```css
+.header {
+    background-color: #0056b3; /* Cor principal */
+}
+
+.primary {
+    background-color: #0056b3; /* Botão primário */
+}
+```
+
+### Alterando Conteúdo
+
+Para alterar o conteúdo, modifique o HTML no template:
+
+```html
+<div class="header">
+    <p>SUA EMPRESA</p>  <!-- Nome da empresa -->
+    <h1>Solicitação Registrada</h1>
+</div>
+```
+
+### Adicionando Novas Variáveis
+
+1. **Adicione a variável** no template HTML
+2. **Inclua no dicionário** de variáveis
+3. **Atualize a documentação**
+
+```python
 variaveis = {
-    'codigo_referencia': 'OS-2024-001',
-    'nome_cliente': 'João Silva',
-    'titulo': 'Problema de Login',
-    'categoria': 'Acesso',
-    'prioridade': 'Alta'
+    'nova_variavel': 'valor',
+    # ... outras variáveis
 }
-
-# Enviar email
-sucesso = template_manager.enviar_email_com_template(
-    nome_template='confirmacao_abertura',
-    destinatario='cliente@exemplo.com',
-    variaveis=variaveis
-)
 ```
 
-### **2. Uso Avançado com Validação**
+## 🔄 Fallback
 
-```python
-# Validar template antes de usar
-dados_template = {
-    'nome': 'meu_template',
-    'assunto': 'Teste {variavel}',
-    'corpo_html': '<p>Olá {nome}</p>',
-    'variaveis': ['variavel', 'nome']
-}
+Se o template1.html falhar, o sistema usa:
 
-validacao = template_manager.validar_template(dados_template)
-if validacao['valido']:
-    print("Template válido!")
-    print(f"Variáveis encontradas: {validacao['variaveis_encontradas']}")
-else:
-    print(f"Erros: {validacao['erros']}")
+1. **Template do banco de dados** (se disponível)
+2. **Email simples** como último recurso
+
+### Logs de Erro
+
+Os erros são registrados no console:
+
+```
+✅ Email enviado com sucesso usando template1.html para solicitação OS20241201001
+❌ Erro no email moderno: [detalhes do erro]
+❌ Erro no email simples: [detalhes do erro]
 ```
 
-### **3. Integração no Sistema**
+## 📱 Responsividade
 
-```python
-# Em routes/formulario.py - após criar solicitação
-def enviar_confirmacao_abertura(solicitacao_id):
-    template_manager = EmailTemplateManager()
-    
-    # Buscar dados da solicitação
-    solicitacao = get_solicitacao_completa(solicitacao_id)
-    
-    # Preparar variáveis
-    variaveis = {
-        'codigo_referencia': solicitacao['CODIGO_REFERENCIA'],
-        'nome_cliente': solicitacao['NOME_CLIENTE'],
-        'titulo': solicitacao['TITULO'],
-        'categoria': solicitacao['NOME_CATEGORIA'],
-        'prioridade': solicitacao['NOME_PRIORIDADE'],
-        'prazo_estimado': formatar_prazo(solicitacao['PRAZO_RESOLUCAO']),
-        'descricao': solicitacao['DESCRICAO'],
-        'link_acompanhamento': f"{BASE_URL}/acompanhar/{solicitacao['CODIGO_REFERENCIA']}"
+O template é responsivo e funciona em:
+- **Desktop** (largura máxima: 600px)
+- **Tablet** (ajuste automático)
+- **Mobile** (padding reduzido)
+
+### Media Queries
+
+```css
+@media (max-width: 600px) {
+    .email-container {
+        margin: 10px;
     }
     
-    # Enviar email
-    return template_manager.enviar_email_com_template(
-        nome_template='confirmacao_abertura',
-        destinatario=solicitacao['EMAIL_CLIENTE'],
-        variaveis=variaveis
-    )
-```
-
-## 🖥️ Interface Administrativa
-
-### **Acessando a Interface:**
-
-1. Faça login como administrador
-2. Acesse o painel administrativo
-3. Clique no card "Templates"
-4. Você será redirecionado para `/admin/templates`
-
-### **Funcionalidades Disponíveis:**
-
-#### **📊 Dashboard de Templates**
-- Estatísticas de templates (total, ativos, inativos)
-- Contador de emails enviados
-- Filtros por status
-
-#### **📝 Gerenciamento de Templates**
-- **Criar**: Novo template com editor HTML
-- **Editar**: Modificar templates existentes
-- **Visualizar**: Preview do template
-- **Testar**: Enviar email de teste
-- **Ativar/Desativar**: Controle de status
-- **Excluir**: Soft delete de templates
-
-#### **🔧 Editor Avançado**
-- **CodeMirror**: Editor com syntax highlighting
-- **Detecção Automática**: Variáveis detectadas automaticamente
-- **Validação**: Verificação de variáveis
-- **Preview**: Visualização em tempo real
-
-### **Como Criar um Template:**
-
-1. **Clique em "Novo Template"**
-2. **Preencha os campos básicos:**
-   - Nome: Identificador único
-   - Assunto: Assunto do email
-3. **Escreva o conteúdo HTML:**
-   - Use variáveis no formato `{variavel}`
-   - O editor detecta automaticamente as variáveis
-4. **Adicione conteúdo texto (opcional):**
-   - Versão texto plano para compatibilidade
-5. **Configure as variáveis:**
-   - As variáveis são detectadas automaticamente
-   - Você pode adicionar variáveis manualmente
-6. **Salve o template**
-
-### **Como Testar um Template:**
-
-1. **Clique no ícone de teste (📧)**
-2. **Digite o email de destino**
-3. **Preencha as variáveis de teste**
-4. **Clique em "Enviar Email de Teste"**
-5. **Verifique se o email foi recebido**
-
-## 💡 Exemplos Práticos
-
-### **Exemplo 1: Template de Confirmação**
-
-```html
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="UTF-8">
-    <title>Confirmação de Solicitação</title>
-</head>
-<body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
-    <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
-        <div style="background: #3B82F6; color: white; padding: 20px; text-align: center; border-radius: 8px 8px 0 0;">
-            <h1 style="margin: 0;">SAOS - Sistema de Abertura de OS</h1>
-        </div>
-        
-        <div style="background: #f9f9f9; padding: 20px; border-radius: 0 0 8px 8px;">
-            <h2 style="color: #3B82F6;">Solicitação Registrada com Sucesso!</h2>
-            
-            <p>Olá <strong>{nome_cliente}</strong>,</p>
-            
-            <p>Sua solicitação foi registrada em nosso sistema com sucesso. Abaixo estão os detalhes:</p>
-            
-            <div style="background: white; padding: 15px; border-radius: 5px; margin: 15px 0;">
-                <p><strong>Código:</strong> {codigo_referencia}</p>
-                <p><strong>Título:</strong> {titulo}</p>
-                <p><strong>Categoria:</strong> {categoria}</p>
-                <p><strong>Prioridade:</strong> <span style="color: #EF4444;">{prioridade}</span></p>
-                <p><strong>Prazo Estimado:</strong> {prazo_estimado}</p>
-            </div>
-            
-            <div style="text-align: center; margin: 30px 0;">
-                <a href="{link_acompanhamento}" style="background: #3B82F6; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; display: inline-block;">
-                    Acompanhar Solicitação
-                </a>
-            </div>
-        </div>
-    </div>
-</body>
-</html>
-```
-
-### **Exemplo 2: Template de Atualização**
-
-```html
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="UTF-8">
-    <title>Atualização de Status</title>
-</head>
-<body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
-    <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
-        <div style="background: {cor_status}; color: white; padding: 20px; text-align: center; border-radius: 8px 8px 0 0;">
-            <h1 style="margin: 0;">Status Atualizado</h1>
-        </div>
-        
-        <div style="background: #f9f9f9; padding: 20px; border-radius: 0 0 8px 8px;">
-            <h2 style="color: {cor_status};">Sua solicitação foi atualizada</h2>
-            
-            <p>Olá <strong>{nome_cliente}</strong>,</p>
-            
-            <p>A solicitação <strong>{codigo_referencia}</strong> teve seu status alterado para:</p>
-            
-            <div style="background: white; padding: 15px; border-radius: 5px; margin: 15px 0; text-align: center;">
-                <h3 style="color: {cor_status}; margin: 0;">{novo_status}</h3>
-                <p style="margin: 5px 0 0 0; font-size: 14px;">Atualizado em {data_atualizacao}</p>
-            </div>
-            
-            <p><strong>Responsável:</strong> {responsavel}</p>
-            
-            {comentario}
-            
-            <div style="text-align: center; margin: 30px 0;">
-                <a href="{link_acompanhamento}" style="background: {cor_status}; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; display: inline-block;">
-                    Ver Detalhes
-                </a>
-            </div>
-        </div>
-    </div>
-</body>
-</html>
-```
-
-## ⚙️ Configuração
-
-### **1. Configurações de Email**
-
-As configurações de email são armazenadas na tabela `CONFIGURACOES`:
-
-```sql
--- Configurações SMTP
-INSERT INTO CONFIGURACOES (CHAVE, VALOR, DESCRICAO) VALUES
-('EMAIL_SMTP_HOST', 'smtp.office365.com', 'Servidor SMTP'),
-('EMAIL_SMTP_PORT', '587', 'Porta SMTP'),
-('EMAIL_SMTP_USER', 'suporte@empresa.com.br', 'Usuário SMTP'),
-('EMAIL_SMTP_PASS', 'sua_senha', 'Senha SMTP'),
-('EMAIL_FROM', 'suporte@empresa.com.br', 'Email remetente'),
-('SISTEMA_NOME', 'SAOS - Sistema de Abertura de OS', 'Nome do sistema'),
-('SISTEMA_URL', 'http://localhost:5001', 'URL base do sistema');
-```
-
-### **2. Configurações de Segurança**
-
-```python
-# Em utils/email_service.py
-class EmailService:
-    def __init__(self):
-        self.config = self._load_config()
-    
-    def _load_config(self):
-        """Carrega configurações de email do banco"""
-        with db_connection() as con:
-            cur = con.cursor()
-            cur.execute("SELECT CHAVE, VALOR FROM CONFIGURACOES WHERE CHAVE LIKE 'EMAIL_%'")
-            config = dict(cur.fetchall())
-        
-        return {
-            'smtp_host': config.get('EMAIL_SMTP_HOST', 'smtp.office365.com'),
-            'smtp_port': int(config.get('EMAIL_SMTP_PORT', '587')),
-            'smtp_user': config.get('EMAIL_SMTP_USER', ''),
-            'smtp_pass': config.get('EMAIL_SMTP_PASS', ''),
-            'from_email': config.get('EMAIL_FROM', ''),
-            'from_name': config.get('SISTEMA_NOME', 'SAOS')
-        }
-```
-
-### **3. Configurações de Template**
-
-```python
-# Configurações padrão para novos templates
-TEMPLATE_DEFAULTS = {
-    'confirmacao_abertura': {
-        'nome': 'confirmacao_abertura',
-        'assunto': 'Sua solicitação #{codigo_referencia} foi registrada com sucesso',
-        'variaveis': ['codigo_referencia', 'nome_cliente', 'titulo', 'categoria', 'prioridade', 'prazo_estimado', 'descricao', 'link_acompanhamento']
-    },
-    'atualizacao_status': {
-        'nome': 'atualizacao_status',
-        'assunto': 'Atualização da solicitação #{codigo_referencia}',
-        'variaveis': ['codigo_referencia', 'nome_cliente', 'novo_status', 'cor_status', 'responsavel', 'data_atualizacao', 'comentario', 'link_acompanhamento']
+    .content {
+        padding: 20px;
     }
 }
 ```
 
-## 🔧 Troubleshooting
+## 🔗 Links Importantes
 
-### **Problemas Comuns e Soluções:**
+- **Acompanhamento**: Link para acompanhar a solicitação
+- **WhatsApp**: Contato direto via WhatsApp
+- **Website**: Site da empresa
 
-#### **1. Email não é enviado**
-```
-Erro: SMTP Authentication failed
-Solução: Verificar credenciais SMTP na tabela CONFIGURACOES
-```
-
-#### **2. Variáveis não são substituídas**
-```
-Erro: {variavel} aparece no email
-Solução: Verificar se a variável está definida no dicionário variaveis
-```
-
-#### **3. Template não encontrado**
-```
-Erro: Template 'nome_template' não encontrado
-Solução: Verificar se o template existe e está ativo
-```
-
-#### **4. Caracteres especiais corrompidos**
-```
-Erro: Acentos aparecem como ?????
-Solução: Verificar encoding UTF-8 no template e configurações
-```
-
-#### **5. HTML não renderiza**
-```
-Erro: Email aparece como código HTML
-Solução: Verificar se o cliente de email suporta HTML
-```
-
-### **Logs de Debug:**
+### Configuração de Links
 
 ```python
-# Habilitar logs detalhados
-import logging
-
-logging.basicConfig(level=logging.DEBUG)
-logger = logging.getLogger('email_service')
-
-# No EmailService
-def enviar_email(self, destinatario, assunto, corpo_html, corpo_texto=None):
-    try:
-        logger.debug(f"Enviando email para: {destinatario}")
-        logger.debug(f"Assunto: {assunto}")
-        # ... resto do código
-    except Exception as e:
-        logger.error(f"Erro ao enviar email: {e}")
-        return False
+link_acompanhamento = f"{base_url}/acompanhar/{codigo_referencia}"
+whatsapp_link = "https://wa.me/556133016575"
+website_link = "https://www.medware.com.br"
 ```
 
-### **Testes de Conectividade:**
+## 📊 Monitoramento
+
+### Métricas de Email
+
+- **Taxa de entrega**: % de emails entregues
+- **Taxa de abertura**: % de emails abertos
+- **Taxa de clique**: % de cliques nos links
+
+### Logs de Sistema
 
 ```python
-# Testar conexão SMTP
-def testar_conexao_smtp():
-    import smtplib
-    
-    try:
-        with smtplib.SMTP('smtp.office365.com', 587) as server:
-            server.starttls()
-            server.login('seu_email@empresa.com', 'sua_senha')
-            print("✅ Conexão SMTP OK")
-            return True
-    except Exception as e:
-        print(f"❌ Erro na conexão SMTP: {e}")
-        return False
+print(f"📧 Email enviado: {destinatario}")
+print(f"📋 Solicitação: {codigo_referencia}")
+print(f"⏰ Timestamp: {datetime.now()}")
 ```
-
-## 📚 Recursos Adicionais
-
-### **Links Úteis:**
-- [Documentação do Sistema SAOS](../README.md)
-- [API Reference](../docs/api_reference.md)
-- [Database Schema](../database/schema.sql)
-
-### **Exemplos de Código:**
-- [Exemplos de Uso](../examples/email_templates_usage.py)
-- [Templates Padrão](../utils/email_template_manager.py)
-
-### **Ferramentas:**
-- [Interface Administrativa](../templates/admin_templates.html)
-- [Gerenciador de Templates](../utils/email_template_manager.py)
-- [Serviço de Email](../utils/email_service.py)
 
 ---
 
-**📞 Suporte:** Para dúvidas ou problemas, consulte a documentação ou entre em contato com a equipe de desenvolvimento.
+**Versão**: 1.0  
+**Última atualização**: Dezembro 2024  
+**Responsável**: Equipe de Desenvolvimento SAOS

@@ -199,9 +199,9 @@ def confirmacao():
                          tipo="N/A")
 
 def enviar_email_confirmacao(codigo, nome, email, tipo, descricao, sistema):
-    """Envia email de confirmação de abertura"""
+    """Envia email de confirmação de abertura usando template1.html"""
     try:
-        # Usa o serviço de email moderno se disponível
+        # Usa o serviço de email moderno com template1.html
         from utils.email_service import EmailService
         email_service = EmailService()
         
@@ -219,19 +219,20 @@ def enviar_email_confirmacao(codigo, nome, email, tipo, descricao, sistema):
             
             solicitacao = cur.fetchone()
             if solicitacao:
-                # Envia email usando o template
+                # Envia email usando o template1.html
                 email_service.enviar_confirmacao_abertura(solicitacao[0])
+                print(f"✅ Email enviado com sucesso usando template1.html para solicitação {codigo}")
             else:
                 # Fallback para email simples
                 enviar_email_simples(codigo, nome, email, tipo, descricao, sistema)
                 
     except Exception as e:
-        print(f"Erro no email moderno: {e}")
+        print(f"❌ Erro no email moderno: {e}")
         # Fallback para email simples
         try:
             enviar_email_simples(codigo, nome, email, tipo, descricao, sistema)
         except Exception as e2:
-            print(f"Erro no email simples: {e2}")
+            print(f"❌ Erro no email simples: {e2}")
             # Se ambos falharem, apenas loga o erro
 
 def enviar_email_simples(codigo, nome, email, tipo, descricao, sistema):
