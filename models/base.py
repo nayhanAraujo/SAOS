@@ -15,7 +15,10 @@ class BaseModel:
             cur = con.cursor()
             cur.execute(f"SELECT * FROM {self.table_name} WHERE {self.primary_key} = ?", (id,))
             row = cur.fetchone()
-            return self._row_to_dict(row) if row else None
+            if row:
+                columns = [description[0] for description in cur.description]
+                return self._row_to_dict(row, columns)
+            return None
     
     def get_all(self, where=None, params=None, order_by=None, limit=None):
         """Busca todos os registros com filtros opcionais"""
@@ -34,7 +37,10 @@ class BaseModel:
             cur = con.cursor()
             cur.execute(query, params or ())
             rows = cur.fetchall()
-            return [self._row_to_dict(row) for row in rows]
+            if rows:
+                columns = [description[0] for description in cur.description]
+                return [self._row_to_dict(row, columns) for row in rows]
+            return []
     
     def create(self, data):
         """Cria um novo registro"""
@@ -86,16 +92,17 @@ class BaseModel:
             cur.execute(query, params or ())
             return cur.fetchone()[0]
     
-    def _row_to_dict(self, row):
+    def _row_to_dict(self, row, columns=None):
         """Converte uma linha do banco em dicionário"""
         if not row:
             return None
         
-        # Obtém os nomes das colunas
-        with db_connection() as con:
-            cur = con.cursor()
-            cur.execute(f"SELECT * FROM {self.table_name} WHERE 1=0")
-            columns = [description[0] for description in cur.description]
+        # Se as colunas não foram fornecidas, obtém do banco (fallback)
+        if columns is None:
+            with db_connection() as con:
+                cur = con.cursor()
+                cur.execute(f"SELECT * FROM {self.table_name} WHERE 1=0")
+                columns = [description[0] for description in cur.description]
         
         # Cria o dicionário
         result = {}
@@ -103,7 +110,20 @@ class BaseModel:
             value = row[i]
             
             # Converte tipos especiais
-            if isinstance(value, datetime):
+            if value is None:
+                result[column] = None
+            elif isinstance(value, bytes):
+                # Converte bytes para string (UTF-8)
+                try:
+                    value = value.decode('utf-8')
+                except UnicodeDecodeError:
+                    # Se não conseguir decodificar como UTF-8, tenta latin-1
+                    try:
+                        value = value.decode('latin-1')
+                    except:
+                        # Se falhar, converte para string hexadecimal
+                        value = value.hex()
+            elif isinstance(value, datetime):
                 value = value.isoformat()
             elif isinstance(value, str) and value and value.startswith('{'):
                 try:

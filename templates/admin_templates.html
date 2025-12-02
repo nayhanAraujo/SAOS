@@ -521,20 +521,29 @@
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                         <div class="flex space-x-2">
-                            <button onclick="visualizarTemplate(${template.id})" class="text-blue-600 hover:text-blue-900">
+                            <button onclick="visualizarTemplate(${template.id})" 
+                                    class="text-blue-600 hover:text-blue-900 transition-colors duration-200" 
+                                    title="Visualizar Template">
                                 <i class="fas fa-eye"></i>
                             </button>
-                            <button onclick="editarTemplate(${template.id})" class="text-yellow-600 hover:text-yellow-900">
+                            <button onclick="editarTemplate(${template.id})" 
+                                    class="text-yellow-600 hover:text-yellow-900 transition-colors duration-200" 
+                                    title="Editar Template">
                                 <i class="fas fa-edit"></i>
                             </button>
-                            <button onclick="testarTemplate(${template.id})" class="text-green-600 hover:text-green-900">
+                            <button onclick="testarTemplate(${template.id})" 
+                                    class="text-green-600 hover:text-green-900 transition-colors duration-200" 
+                                    title="Testar Template (Enviar Email de Teste)">
                                 <i class="fas fa-paper-plane"></i>
                             </button>
                             <button onclick="toggleTemplate(${template.id}, ${!template.ativo})" 
-                                    class="${template.ativo ? 'text-red-600 hover:text-red-900' : 'text-green-600 hover:text-green-900'}">
+                                    class="${template.ativo ? 'text-red-600 hover:text-red-900' : 'text-green-600 hover:text-green-900'} transition-colors duration-200" 
+                                    title="${template.ativo ? 'Desativar Template' : 'Ativar Template'}">
                                 <i class="fas fa-${template.ativo ? 'times' : 'check'}"></i>
                             </button>
-                            <button onclick="excluirTemplate(${template.id})" class="text-red-600 hover:text-red-900">
+                            <button onclick="excluirTemplate(${template.id})" 
+                                    class="text-red-600 hover:text-red-900 transition-colors duration-200" 
+                                    title="Excluir Template">
                                 <i class="fas fa-trash"></i>
                             </button>
                         </div>

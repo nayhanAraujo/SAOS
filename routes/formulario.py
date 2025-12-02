@@ -19,9 +19,17 @@ def formulario():
                 return redirect('/login')
             
             # Dados do formulário
-            sistema = request.form['sistema']
-            tipo = request.form['tipo']
+            cod_sistema = request.form.get('cod_sistema')
+            cod_tipo_produtividade = request.form.get('cod_tipo_produtividade')
             descricao = request.form['descricao']
+            telefone = request.form['telefone']
+            email_contato = request.form['email_contato']
+            responsavel = request.form.get('responsavel', '')  # Opcional, apenas para técnicos/admins
+
+            # Validação dos campos obrigatórios
+            if not cod_sistema or not cod_tipo_produtividade:
+                flash('Por favor, selecione o sistema e o tipo de produtividade.', 'error')
+                return redirect('/')
 
             # Dados do usuário logado
             usuario_id = session['usuario_id']
@@ -41,33 +49,49 @@ def formulario():
                     flash('Usuário não encontrado.', 'error')
                     return redirect('/')
                 
-                nome, email, telefone, cpf_cnpj = usuario
+                nome, email, telefone_db, cpf_cnpj = usuario
                 
-                # Busca categoria baseada no tipo
+                # Busca descrição do sistema
+                cur.execute("""
+                    SELECT DESCRICAO FROM SISTEMAS WHERE CODSISTEMA = ?
+                """, (cod_sistema,))
+                sistema_result = cur.fetchone()
+                sistema_descricao = sistema_result[0] if sistema_result else 'Sistema não identificado'
+                
+                # Busca descrição do tipo de produtividade
+                cur.execute("""
+                    SELECT DESCRICAO FROM TIPOPRODUTIVIDADE WHERE CODTIPOPRODUTIVIDADE = ?
+                """, (cod_tipo_produtividade,))
+                tipo_result = cur.fetchone()
+                tipo_descricao = tipo_result[0] if tipo_result else 'Tipo não identificado'
+                
+                # Cria título da solicitação baseado no sistema e tipo
+                titulo_solicitacao = f"{sistema_descricao} - {tipo_descricao}"
+                
+                # Busca categoria padrão ou cria uma
                 cur.execute("""
                     SELECT ID FROM CATEGORIAS 
-                    WHERE NOME = ? AND ATIVO = TRUE
-                """, (tipo,))
+                    WHERE NOME = 'Geral' AND ATIVO = TRUE
+                """)
                 categoria_result = cur.fetchone()
-                
                 if not categoria_result:
-                    # Se não encontrar, usa categoria padrão ou cria uma
+                    # Busca qualquer categoria ativa
                     cur.execute("""
                         SELECT ID FROM CATEGORIAS 
-                        WHERE NOME = 'Outro' AND ATIVO = TRUE
+                        WHERE ATIVO = TRUE
+                        ORDER BY ID
                     """)
                     categoria_result = cur.fetchone()
                     if not categoria_result:
-                        # Cria categoria "Outro" se não existir
+                        # Cria categoria padrão se não existir
                         cur.execute("""
                             INSERT INTO CATEGORIAS (NOME, DESCRICAO, COR, ICONE, ATIVO)
-                            VALUES ('Outro', ?, '#6B7280', 'fas fa-question', TRUE)
-                        """, ('Outros tipos de solicitação'.encode('utf-8'),))
+                            VALUES ('Geral', ?, '#3B82F6', 'fas fa-folder', TRUE)
+                        """, ('Categoria geral de solicitações'.encode('utf-8'),))
                         con.commit()
-                        # Busca o ID da categoria recém-criada
                         cur.execute("""
                             SELECT ID FROM CATEGORIAS 
-                            WHERE NOME = 'Outro' 
+                            WHERE NOME = 'Geral' 
                             ORDER BY DTHR_CRIACAO DESC
                         """)
                         categoria_id = cur.fetchone()[0]
@@ -123,16 +147,36 @@ def formulario():
                 
                 # Insere na nova estrutura da tabela SOLICITACOES
                 # Para campos BLOB, precisamos converter string para bytes
-                cur.execute("""
-                    INSERT INTO SOLICITACOES (
-                        CODIGO_REFERENCIA, TITULO, DESCRICAO, ID_CLIENTE, ID_CATEGORIA, 
-                        ID_PRIORIDADE, ID_STATUS, SISTEMA, PRAZO_RESOLUCAO, 
-                        DTHR_CRIACAO, DTHR_ATUALIZACAO
-                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
-                """, (
-                    codigo_referencia, tipo, descricao.encode('utf-8'), usuario_id, categoria_id,
-                    prioridade_id, status_id, sistema, prazo_resolucao
-                ))
+                # Verifica se a tabela tem os campos CODSISTEMA e CODTIPOPRODUTIVIDADE
+                try:
+                    # Tenta inserir com os novos campos
+                    cur.execute("""
+                        INSERT INTO SOLICITACOES (
+                            CODIGO_REFERENCIA, TITULO, DESCRICAO, ID_CLIENTE, ID_CATEGORIA, 
+                            ID_PRIORIDADE, ID_STATUS, CODSISTEMA, CODTIPOPRODUTIVIDADE, PRAZO_RESOLUCAO, 
+                            TELEFONE_CLIENTE, EMAIL_CONTATO, RESPONSAVEL_TECNICO,
+                            DTHR_CRIACAO, DTHR_ATUALIZACAO
+                        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+                    """, (
+                        codigo_referencia, titulo_solicitacao, descricao.encode('utf-8'), usuario_id, categoria_id,
+                        prioridade_id, status_id, cod_sistema, cod_tipo_produtividade, prazo_resolucao, 
+                        telefone, email_contato, responsavel
+                    ))
+                except Exception as e:
+                    # Fallback: se os campos não existirem, usa SISTEMA como VARCHAR
+                    print(f"Aviso: Campos CODSISTEMA/CODTIPOPRODUTIVIDADE não encontrados, usando fallback: {e}")
+                    cur.execute("""
+                        INSERT INTO SOLICITACOES (
+                            CODIGO_REFERENCIA, TITULO, DESCRICAO, ID_CLIENTE, ID_CATEGORIA, 
+                            ID_PRIORIDADE, ID_STATUS, SISTEMA, PRAZO_RESOLUCAO, 
+                            TELEFONE_CLIENTE, EMAIL_CONTATO, RESPONSAVEL_TECNICO,
+                            DTHR_CRIACAO, DTHR_ATUALIZACAO
+                        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+                    """, (
+                        codigo_referencia, titulo_solicitacao, descricao.encode('utf-8'), usuario_id, categoria_id,
+                        prioridade_id, status_id, sistema_descricao, prazo_resolucao, 
+                        telefone, email_contato, responsavel
+                    ))
                 
                 # Para Firebird, precisamos buscar o ID da solicitação recém-criada
                 cur.execute("""
@@ -169,7 +213,7 @@ def formulario():
 
                 # Envia email de confirmação
                 try:
-                    enviar_email_confirmacao(codigo_referencia, nome, email, tipo, descricao, sistema)
+                    enviar_email_confirmacao(codigo_referencia, nome, email_contato, tipo_descricao, descricao, sistema_descricao, telefone)
                 except Exception as email_error:
                     print(f"Erro ao enviar email: {email_error}")
                     # Continua mesmo se o email falhar
@@ -178,8 +222,8 @@ def formulario():
                 return render_template('confirmacao.html', 
                                      codigo_referencia=codigo_referencia,
                                      data_criacao=data_atual.strftime('%d/%m/%Y %H:%M'),
-                                     sistema=sistema,
-                                     tipo=tipo)
+                                     sistema=sistema_descricao,
+                                     tipo=tipo_descricao)
                 
         except Exception as e:
             flash(f'Ocorreu um erro ao processar a solicitação: {str(e)}', 'error')
@@ -198,7 +242,7 @@ def confirmacao():
                          sistema="N/A",
                          tipo="N/A")
 
-def enviar_email_confirmacao(codigo, nome, email, tipo, descricao, sistema):
+def enviar_email_confirmacao(codigo, nome, email, tipo, descricao, sistema, telefone):
     """Envia email de confirmação de abertura usando template1.html"""
     try:
         # Usa o serviço de email moderno com template1.html
@@ -210,7 +254,8 @@ def enviar_email_confirmacao(codigo, nome, email, tipo, descricao, sistema):
             cur = con.cursor()
             cur.execute("""
                 SELECT s.ID, s.CODIGO_REFERENCIA, s.TITULO, s.DESCRICAO, 
-                       c.NOME as CATEGORIA, p.NOME as PRIORIDADE, s.PRAZO_RESOLUCAO
+                       c.NOME as CATEGORIA, p.NOME as PRIORIDADE, s.PRAZO_RESOLUCAO,
+                       s.TELEFONE_CLIENTE, s.EMAIL_CONTATO, s.RESPONSAVEL_TECNICO
                 FROM SOLICITACOES s
                 JOIN CATEGORIAS c ON s.ID_CATEGORIA = c.ID
                 JOIN PRIORIDADES p ON s.ID_PRIORIDADE = p.ID
@@ -224,22 +269,34 @@ def enviar_email_confirmacao(codigo, nome, email, tipo, descricao, sistema):
                 print(f"✅ Email enviado com sucesso usando template1.html para solicitação {codigo}")
             else:
                 # Fallback para email simples
-                enviar_email_simples(codigo, nome, email, tipo, descricao, sistema)
+                enviar_email_simples(codigo, nome, email, tipo, descricao, sistema, telefone)
                 
     except Exception as e:
         print(f"❌ Erro no email moderno: {e}")
         # Fallback para email simples
         try:
-            enviar_email_simples(codigo, nome, email, tipo, descricao, sistema)
+            enviar_email_simples(codigo, nome, email, tipo, descricao, sistema, telefone)
         except Exception as e2:
             print(f"❌ Erro no email simples: {e2}")
             # Se ambos falharem, apenas loga o erro
 
-def enviar_email_simples(codigo, nome, email, tipo, descricao, sistema):
+def enviar_email_simples(codigo, nome, email, tipo, descricao, sistema, telefone):
     """Envia email simples como fallback"""
     try:
         from utils.email_sender import enviar_email
-        enviar_email(sistema, tipo, nome, "", email, descricao, None)
+        assunto = f"Solicitação {codigo} Registrada - Medware"
+        corpo_html = f"""
+        <h2>Sua solicitação foi registrada com sucesso!</h2>
+        <p><strong>Código:</strong> {codigo}</p>
+        <p><strong>Nome:</strong> {nome}</p>
+        <p><strong>Telefone:</strong> {telefone}</p>
+        <p><strong>E-mail:</strong> {email}</p>
+        <p><strong>Tipo:</strong> {tipo}</p>
+        <p><strong>Sistema:</strong> {sistema}</p>
+        <p><strong>Descrição:</strong> {descricao}</p>
+        <p>Em breve entraremos em contato.</p>
+        """
+        enviar_email(email, assunto, corpo_html, None)
     except Exception as e:
         print(f"Erro ao enviar email simples: {e}")
         # Se falhar, apenas loga o erro mas não interrompe o fluxo

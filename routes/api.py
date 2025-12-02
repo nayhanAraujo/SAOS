@@ -346,10 +346,21 @@ def listar_categorias():
         categoria_model = BaseModel()
         categoria_model.table_name = 'CATEGORIAS'
         
-        categorias = categoria_model.get_all(
-            where="ATIVO = TRUE",
-            order_by="NOME"
-        )
+        # Tenta buscar apenas categorias ativas, se falhar busca todas
+        try:
+            categorias = categoria_model.get_all(
+                where="ATIVO = 1",
+                order_by="NOME"
+            )
+        except:
+            # Fallback: busca todas as categorias
+            categorias = categoria_model.get_all(
+                order_by="NOME"
+            )
+        
+        # Garantir que retorna uma lista mesmo se vazia
+        if not categorias:
+            categorias = []
         
         return jsonify({
             'success': True,
@@ -357,6 +368,9 @@ def listar_categorias():
         })
         
     except Exception as e:
+        import traceback
+        error_trace = traceback.format_exc()
+        print(f"Erro ao listar categorias: {error_trace}")
         return jsonify({
             'success': False,
             'error': str(e)
@@ -403,6 +417,64 @@ def listar_status():
         })
         
     except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+@api_bp.route('/sistemas', methods=['GET'])
+def listar_sistemas():
+    """Lista todos os sistemas"""
+    try:
+        sistema_model = BaseModel()
+        sistema_model.table_name = 'SISTEMAS'
+        
+        sistemas = sistema_model.get_all(
+            order_by="DESCRICAO"
+        )
+        
+        # Garantir que retorna uma lista mesmo se vazia
+        if not sistemas:
+            sistemas = []
+        
+        return jsonify({
+            'success': True,
+            'data': sistemas
+        })
+        
+    except Exception as e:
+        import traceback
+        error_trace = traceback.format_exc()
+        print(f"Erro ao listar sistemas: {error_trace}")
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+@api_bp.route('/tipos-produtividade', methods=['GET'])
+def listar_tipos_produtividade():
+    """Lista todos os tipos de produtividade"""
+    try:
+        tipo_model = BaseModel()
+        tipo_model.table_name = 'TIPOPRODUTIVIDADE'
+        
+        tipos = tipo_model.get_all(
+            order_by="DESCRICAO"
+        )
+        
+        # Garantir que retorna uma lista mesmo se vazia
+        if not tipos:
+            tipos = []
+        
+        return jsonify({
+            'success': True,
+            'data': tipos
+        })
+        
+    except Exception as e:
+        import traceback
+        error_trace = traceback.format_exc()
+        print(f"Erro ao listar tipos de produtividade: {error_trace}")
         return jsonify({
             'success': False,
             'error': str(e)
@@ -786,12 +858,29 @@ def obter_template_email(template_id):
             
             row = cur.fetchone()
             if row:
+                # Função auxiliar para decodificar BLOB com fallback de codificação
+                def decode_blob(blob_data):
+                    if not blob_data:
+                        return ''
+                    if isinstance(blob_data, str):
+                        return blob_data
+                    # Tenta UTF-8 primeiro
+                    try:
+                        return blob_data.decode('utf-8')
+                    except UnicodeDecodeError:
+                        # Se falhar, tenta latin-1 (compatível com Windows-1252)
+                        try:
+                            return blob_data.decode('latin-1')
+                        except UnicodeDecodeError:
+                            # Último recurso: usa errors='replace' para substituir caracteres inválidos
+                            return blob_data.decode('utf-8', errors='replace')
+                
                 template = {
                     'id': row[0],
                     'nome': row[1],
                     'assunto': row[2],
-                    'corpo_html': row[3].decode('utf-8') if row[3] else '',
-                    'corpo_texto': row[4].decode('utf-8') if row[4] else '',
+                    'corpo_html': decode_blob(row[3]),
+                    'corpo_texto': decode_blob(row[4]),
                     'variaveis': json.loads(row[5]) if row[5] else [],
                     'ativo': row[6]
                 }

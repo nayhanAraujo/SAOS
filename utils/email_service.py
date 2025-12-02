@@ -15,18 +15,24 @@ class EmailService:
     
     def _load_config(self):
         """Carrega configurações de email do banco"""
-        with db_connection() as con:
-            cur = con.cursor()
-            cur.execute("SELECT CHAVE, VALOR FROM CONFIGURACOES WHERE CHAVE LIKE 'EMAIL_%'")
-            config = dict(cur.fetchall())
+        try:
+            with db_connection() as con:
+                cur = con.cursor()
+                cur.execute("SELECT CHAVE, VALOR FROM CONFIGURACOES WHERE CHAVE LIKE 'EMAIL_%'")
+                config = dict(cur.fetchall())
+        except:
+            # Se não conseguir carregar do banco, usa configurações padrão
+            config = {}
         
         return {
-            'smtp_host': config.get('EMAIL_SMTP_HOST', 'smtp.office365.com'),
+            'smtp_host': config.get('EMAIL_SMTP_HOST', 'smtp.medware.com.br'),
             'smtp_port': int(config.get('EMAIL_SMTP_PORT', '587')),
-            'smtp_user': config.get('EMAIL_SMTP_USER', 'nayhan@medware.com.br'),
-            'smtp_pass': config.get('EMAIL_SMTP_PASS', 'N@yhanbsb1233030'),
-            'from_email': config.get('EMAIL_FROM', 'nayhan@medware.com.br'),
-            'from_name': config.get('SISTEMA_NOME', 'SAOS - Sistema de Abertura de OS')
+            'smtp_user': config.get('EMAIL_SMTP_USER', 'medware@medware.com.br'),
+            'smtp_pass': config.get('EMAIL_SMTP_PASS', 'Medware!111096'),
+            'from_email': config.get('EMAIL_FROM', 'demandas@medware.com.br'),
+            'from_name': config.get('SISTEMA_NOME', 'SAOS - Sistema de Abertura de OS'),
+            'enable_ssl': config.get('EMAIL_ENABLE_SSL', 'false').lower() == 'true',
+            'use_default_credentials': config.get('EMAIL_USE_DEFAULT_CREDENTIALS', 'false').lower() == 'true'
         }
     
     def get_template(self, nome_template):
@@ -248,7 +254,10 @@ class EmailService:
         corpo_html = self.get_template1_html(variaveis)
         assunto = f"Solicitação {solicitacao['CODIGO_REFERENCIA']} Registrada - Medware"
         
-        return self.enviar_email(solicitacao['EMAIL_CLIENTE'], assunto, corpo_html, None)
+        # CC para o suporte técnico
+        cc_suporte = "suporte@medware.com.br"
+        
+        return self.enviar_email(solicitacao['EMAIL_CLIENTE'], assunto, corpo_html, None, cc=cc_suporte)
     
     def enviar_confirmacao_abertura_legacy(self, solicitacao_id):
         """Envia email de confirmação de abertura usando template do banco"""
@@ -333,13 +342,17 @@ class EmailService:
         
         return self.enviar_template('resolucao_concluida', solicitacao['EMAIL_CLIENTE'], variaveis)
     
-    def enviar_email(self, destinatario, assunto, corpo_html, corpo_texto=None, anexos=None):
-        """Envia email genérico"""
+    def enviar_email(self, destinatario, assunto, corpo_html, corpo_texto=None, anexos=None, cc=None):
+        """Envia email genérico usando servidor corporativo Medware"""
         try:
             msg = MIMEMultipart('alternative')
             msg['Subject'] = assunto
             msg['From'] = f"{self.config['from_name']} <{self.config['from_email']}>"
             msg['To'] = destinatario
+            
+            # Adiciona CC se fornecido
+            if cc:
+                msg['Cc'] = cc
             
             # Corpo do email
             if corpo_html:
@@ -360,16 +373,27 @@ class EmailService:
                         part.add_header('Content-Disposition', 'attachment', filename=os.path.basename(anexo))
                         msg.attach(part)
             
-            # Envia o email
+            # Envia o email usando configurações corporativas
             with smtplib.SMTP(self.config['smtp_host'], self.config['smtp_port']) as server:
-                server.starttls()
+                # Configurações específicas do servidor Medware
+                if not self.config['enable_ssl']:
+                    # Não usa SSL/TLS (como na classe C#)
+                    pass
+                else:
+                    # Usa STARTTLS se habilitado
+                    server.starttls()
+                
+                # Login com credenciais corporativas
                 server.login(self.config['smtp_user'], self.config['smtp_pass'])
+                
+                # Envia a mensagem
                 server.send_message(msg)
             
+            print(f"✅ Email enviado com sucesso para: {destinatario}")
             return True
             
         except Exception as e:
-            print(f"Erro ao enviar email: {str(e)}")
+            print(f"❌ Erro ao enviar email: {str(e)}")
             return False
     
     def _substituir_variaveis(self, texto, variaveis):

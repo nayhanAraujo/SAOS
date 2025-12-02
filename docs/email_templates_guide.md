@@ -88,20 +88,28 @@ def enviar_confirmacao_abertura(self, solicitacao_id):
 5. **Template1.html** é processado com variáveis
 6. **Email é enviado** para o cliente
 
-### Configuração de Email
+### Configuração de Email Corporativo
 
-As configurações de email são carregadas do banco de dados:
+O sistema está configurado para usar o servidor de email corporativo da Medware:
 
+**Configurações padrão:**
+- `EMAIL_SMTP_HOST`: smtp.medware.com.br
+- `EMAIL_SMTP_PORT`: 587
+- `EMAIL_SMTP_USER`: medware@medware.com.br
+- `EMAIL_SMTP_PASS`: Medware!111096
+- `EMAIL_FROM`: medware@medware.com.br
+- `EMAIL_ENABLE_SSL`: false
+- `EMAIL_USE_DEFAULT_CREDENTIALS`: false
+
+**Para configurar:**
+```bash
+python scripts/configurar_email.py
+```
+
+**Configurações no banco:**
 ```sql
 SELECT CHAVE, VALOR FROM CONFIGURACOES WHERE CHAVE LIKE 'EMAIL_%'
 ```
-
-Configurações necessárias:
-- `EMAIL_SMTP_HOST`: Servidor SMTP
-- `EMAIL_SMTP_PORT`: Porta SMTP
-- `EMAIL_SMTP_USER`: Usuário SMTP
-- `EMAIL_SMTP_PASS`: Senha SMTP
-- `EMAIL_FROM`: Email remetente
 
 ## 🧪 Testes
 
