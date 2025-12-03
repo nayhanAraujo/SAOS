@@ -147,36 +147,45 @@ def formulario():
                 
                 # Insere na nova estrutura da tabela SOLICITACOES
                 # Para campos BLOB, precisamos converter string para bytes
-                # Verifica se a tabela tem os campos CODSISTEMA e CODTIPOPRODUTIVIDADE
+                # Tenta inserir com os novos campos CODSISTEMA e CODTIPOPRODUTIVIDADE
                 try:
-                    # Tenta inserir com os novos campos
                     cur.execute("""
                         INSERT INTO SOLICITACOES (
                             CODIGO_REFERENCIA, TITULO, DESCRICAO, ID_CLIENTE, ID_CATEGORIA, 
                             ID_PRIORIDADE, ID_STATUS, CODSISTEMA, CODTIPOPRODUTIVIDADE, PRAZO_RESOLUCAO, 
-                            TELEFONE_CLIENTE, EMAIL_CONTATO, RESPONSAVEL_TECNICO,
                             DTHR_CRIACAO, DTHR_ATUALIZACAO
-                        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+                        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
                     """, (
                         codigo_referencia, titulo_solicitacao, descricao.encode('utf-8'), usuario_id, categoria_id,
-                        prioridade_id, status_id, cod_sistema, cod_tipo_produtividade, prazo_resolucao, 
-                        telefone, email_contato, responsavel
+                        prioridade_id, status_id, cod_sistema, cod_tipo_produtividade, prazo_resolucao
                     ))
                 except Exception as e:
-                    # Fallback: se os campos não existirem, usa SISTEMA como VARCHAR
+                    # Fallback: se os campos CODSISTEMA/CODTIPOPRODUTIVIDADE não existirem, usa SISTEMA como VARCHAR
                     print(f"Aviso: Campos CODSISTEMA/CODTIPOPRODUTIVIDADE não encontrados, usando fallback: {e}")
-                    cur.execute("""
-                        INSERT INTO SOLICITACOES (
-                            CODIGO_REFERENCIA, TITULO, DESCRICAO, ID_CLIENTE, ID_CATEGORIA, 
-                            ID_PRIORIDADE, ID_STATUS, SISTEMA, PRAZO_RESOLUCAO, 
-                            TELEFONE_CLIENTE, EMAIL_CONTATO, RESPONSAVEL_TECNICO,
-                            DTHR_CRIACAO, DTHR_ATUALIZACAO
-                        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
-                    """, (
-                        codigo_referencia, titulo_solicitacao, descricao.encode('utf-8'), usuario_id, categoria_id,
-                        prioridade_id, status_id, sistema_descricao, prazo_resolucao, 
-                        telefone, email_contato, responsavel
-                    ))
+                    try:
+                        cur.execute("""
+                            INSERT INTO SOLICITACOES (
+                                CODIGO_REFERENCIA, TITULO, DESCRICAO, ID_CLIENTE, ID_CATEGORIA, 
+                                ID_PRIORIDADE, ID_STATUS, SISTEMA, PRAZO_RESOLUCAO, 
+                                DTHR_CRIACAO, DTHR_ATUALIZACAO
+                            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+                        """, (
+                            codigo_referencia, titulo_solicitacao, descricao.encode('utf-8'), usuario_id, categoria_id,
+                            prioridade_id, status_id, sistema_descricao, prazo_resolucao
+                        ))
+                    except Exception as e2:
+                        # Último fallback: apenas campos básicos
+                        print(f"Erro no fallback, usando campos básicos: {e2}")
+                        cur.execute("""
+                            INSERT INTO SOLICITACOES (
+                                CODIGO_REFERENCIA, TITULO, DESCRICAO, ID_CLIENTE, ID_CATEGORIA, 
+                                ID_PRIORIDADE, ID_STATUS, SISTEMA, PRAZO_RESOLUCAO, 
+                                DTHR_CRIACAO, DTHR_ATUALIZACAO
+                            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+                        """, (
+                            codigo_referencia, titulo_solicitacao, descricao.encode('utf-8'), usuario_id, categoria_id,
+                            prioridade_id, status_id, sistema_descricao, prazo_resolucao
+                        ))
                 
                 # Para Firebird, precisamos buscar o ID da solicitação recém-criada
                 cur.execute("""

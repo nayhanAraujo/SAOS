@@ -185,7 +185,7 @@ class EmailService:
         
         <div class="content">
             <h2>Olá, {nome_cliente},</h2>
-            <p>Sua solicitação foi recebida com sucesso por nossa equipe de suporte. Já estamos trabalhando para atendê-la o mais breve possível.</p>
+            <p>Sua solicitação foi recebida com sucesso por nossa equipe de demandas. Já estamos trabalhando para atendê-la o mais breve possível.</p>
             
             <div class="details-box">
                 <p><strong>Nº da Solicitação:</strong> <span>{codigo_referencia}</span></p>
@@ -193,15 +193,20 @@ class EmailService:
                 <p><strong>Data/Hora:</strong> <span>{data_hora}</span></p>
                 <p><strong>Tipo:</strong> <span>{tipo_solicitacao}</span></p>
                 <p><strong>Sistema:</strong> <span>{sistema}</span></p>
-                <p><strong>Prazo Estimado:</strong> <span>{prazo_estimado}</span></p>
             </div>
             
-            <p>Você pode acompanhar o andamento ou tirar dúvidas através dos canais abaixo:</p>
+            <div style="margin: 25px 0; padding: 20px; background-color: #f9f9f9; border-radius: 8px; border-left: 4px solid #0056b3;">
+                <h3 style="font-size: 18px; color: #0056b3; margin-top: 0; margin-bottom: 15px;">Descrição da Solicitação:</h3>
+                <p style="margin: 0; font-size: 15px; color: #555; white-space: pre-wrap;">{descricao}</p>
+            </div>
             
+            
+            <!-- Botões comentados temporariamente
             <div class="cta-section">
                 <a href="{link_acompanhamento}" class="button primary">Acompanhar Solicitação</a>
                 <a href="https://wa.me/556133016575" class="button whatsapp">Falar no WhatsApp</a>
             </div>
+            -->
             
             <p style="font-size: 15px;">Atenciosamente,<br>
             Equipe de Suporte Medware</p>
@@ -239,14 +244,32 @@ class EmailService:
         if not solicitacao:
             return False
         
+        # Obtém descrição do sistema (prioriza DESCRICAO_SISTEMA, fallback para SISTEMA)
+        sistema_descricao = solicitacao.get('DESCRICAO_SISTEMA') or solicitacao.get('SISTEMA', 'Sistema não identificado')
+        
+        # Obtém descrição do tipo de produtividade
+        tipo_descricao = solicitacao.get('DESCRICAO_TIPO_PRODUTIVIDADE') or solicitacao.get('TITULO', 'Tipo não identificado')
+        
+        # Obtém descrição da solicitação (pode ser bytes, precisa converter)
+        descricao_solicitacao = solicitacao.get('DESCRICAO', '')
+        if isinstance(descricao_solicitacao, bytes):
+            try:
+                descricao_solicitacao = descricao_solicitacao.decode('utf-8')
+            except UnicodeDecodeError:
+                try:
+                    descricao_solicitacao = descricao_solicitacao.decode('latin-1')
+                except:
+                    descricao_solicitacao = str(descricao_solicitacao)
+        descricao_solicitacao = descricao_solicitacao or 'Sem descrição informada'
+        
         # Prepara as variáveis para o template
         variaveis = {
             'nome_cliente': solicitacao['NOME_CLIENTE'],
             'codigo_referencia': solicitacao['CODIGO_REFERENCIA'],
             'data_hora': solicitacao['DTHR_CRIACAO'].strftime('%d/%m/%Y - %H:%M') if solicitacao['DTHR_CRIACAO'] else 'N/A',
-            'tipo_solicitacao': solicitacao['TITULO'],
-            'sistema': solicitacao.get('SISTEMA', 'Sistema Principal'),
-            'prazo_estimado': self._formatar_prazo(solicitacao['PRAZO_RESOLUCAO']),
+            'tipo_solicitacao': tipo_descricao,
+            'sistema': sistema_descricao,
+            'descricao': descricao_solicitacao,
             'link_acompanhamento': self._gerar_link_acompanhamento(solicitacao['CODIGO_REFERENCIA'])
         }
         
@@ -255,9 +278,12 @@ class EmailService:
         assunto = f"Solicitação {solicitacao['CODIGO_REFERENCIA']} Registrada - Medware"
         
         # CC para o suporte técnico
-        cc_suporte = "suporte@medware.com.br"
+        cc_suporte = "demandas@medware.com.br,suporte@medware.com.br"
         
-        return self.enviar_email(solicitacao['EMAIL_CLIENTE'], assunto, corpo_html, None, cc=cc_suporte)
+        # Usa EMAIL_CONTATO se disponível, caso contrário usa EMAIL_CLIENTE
+        email_destinatario = solicitacao.get('EMAIL_CONTATO') or solicitacao.get('EMAIL_CLIENTE')
+        
+        return self.enviar_email(email_destinatario, assunto, corpo_html, None, cc=cc_suporte)
     
     def enviar_confirmacao_abertura_legacy(self, solicitacao_id):
         """Envia email de confirmação de abertura usando template do banco"""
@@ -418,19 +444,36 @@ class EmailService:
                     c.EMAIL as EMAIL_CLIENTE,
                     cat.NOME as NOME_CATEGORIA,
                     p.NOME as NOME_PRIORIDADE,
-                    st.NOME as NOME_STATUS
+                    st.NOME as NOME_STATUS,
+                    sis.DESCRICAO as DESCRICAO_SISTEMA,
+                    tp.DESCRICAO as DESCRICAO_TIPO_PRODUTIVIDADE
                 FROM SOLICITACOES s
                 JOIN USUARIOS c ON s.ID_CLIENTE = c.ID
                 JOIN CATEGORIAS cat ON s.ID_CATEGORIA = cat.ID
                 JOIN PRIORIDADES p ON s.ID_PRIORIDADE = p.ID
                 JOIN STATUS st ON s.ID_STATUS = st.ID
+                LEFT JOIN SISTEMAS sis ON s.CODSISTEMA = sis.CODSISTEMA
+                LEFT JOIN TIPOPRODUTIVIDADE tp ON s.CODTIPOPRODUTIVIDADE = tp.CODTIPOPRODUTIVIDADE
                 WHERE s.ID = ?
             """, (solicitacao_id,))
             
             row = cur.fetchone()
             if row:
                 columns = [description[0] for description in cur.description]
-                return dict(zip(columns, row))
+                resultado = {}
+                for i, column in enumerate(columns):
+                    value = row[i]
+                    # Converte bytes para string se necessário
+                    if isinstance(value, bytes):
+                        try:
+                            value = value.decode('utf-8')
+                        except UnicodeDecodeError:
+                            try:
+                                value = value.decode('latin-1')
+                            except:
+                                value = str(value)
+                    resultado[column] = value
+                return resultado
             return None
     
     def _get_status(self, status_id):

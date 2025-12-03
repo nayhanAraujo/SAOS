@@ -41,23 +41,41 @@
         <div class="flex items-center justify-center">
           <div class="flex items-center">
             <div
-              class="bg-blue-600 text-white rounded-full h-10 w-10 flex items-center justify-center"
+              id="step1"
+              class="bg-blue-600 text-white rounded-full h-10 w-10 flex items-center justify-center transition-colors"
             >
               <i class="fas fa-file-alt"></i>
             </div>
-            <div class="bg-blue-600 h-1 w-16"></div>
             <div
-              class="bg-gray-300 text-gray-500 rounded-full h-10 w-10 flex items-center justify-center"
+              id="step1-line"
+              class="bg-blue-600 h-1 w-16 transition-colors"
+            ></div>
+            <div
+              id="step2"
+              class="bg-gray-300 text-gray-500 rounded-full h-10 w-10 flex items-center justify-center transition-colors"
+            >
+              <i class="fas fa-eye"></i>
+            </div>
+            <div
+              id="step2-line"
+              class="bg-gray-300 h-1 w-16 transition-colors"
+            ></div>
+            <div
+              id="step3"
+              class="bg-gray-300 text-gray-500 rounded-full h-10 w-10 flex items-center justify-center transition-colors"
             >
               <i class="fas fa-check"></i>
             </div>
           </div>
         </div>
-        <div class="flex justify-center mt-2">
-          <span class="text-sm font-medium text-blue-600"
+        <div class="flex justify-center mt-2 space-x-8">
+          <span id="step1-label" class="text-sm font-medium text-blue-600"
             >Preencha os dados</span
           >
-          <span class="text-sm text-gray-500 ml-8">Confirmação</span>
+          <span id="step2-label" class="text-sm text-gray-500">Revisão</span>
+          <span id="step3-label" class="text-sm text-gray-500"
+            >Confirmação</span
+          >
         </div>
       </div>
 
@@ -97,205 +115,302 @@
           enctype="multipart/form-data"
           class="p-6 space-y-6"
         >
-          <!-- Sistema e Tipo de Produtividade -->
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-2">
-                <i class="fas fa-desktop mr-2 text-blue-600"></i>
-                Sistema *
-              </label>
-              <select
-                name="cod_sistema"
-                id="cod_sistema"
-                required
-                class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+          <!-- Seção de Revisão (inicialmente oculta) -->
+          <div id="revisaoSection" class="hidden">
+            <div class="bg-blue-50 border border-blue-200 rounded-lg p-6 mb-6">
+              <h3 class="text-lg font-semibold text-gray-900 mb-4">
+                <i class="fas fa-eye mr-2 text-blue-600"></i>
+                Revise os dados antes de enviar
+              </h3>
+
+              <div class="space-y-4">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <p class="text-sm font-medium text-gray-600">Sistema:</p>
+                    <p id="revisao-sistema" class="text-base text-gray-900"></p>
+                  </div>
+                  <div>
+                    <p class="text-sm font-medium text-gray-600">
+                      Tipo de Produtividade:
+                    </p>
+                    <p id="revisao-tipo" class="text-base text-gray-900"></p>
+                  </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <p class="text-sm font-medium text-gray-600">Telefone:</p>
+                    <p
+                      id="revisao-telefone"
+                      class="text-base text-gray-900"
+                    ></p>
+                  </div>
+                  <div>
+                    <p class="text-sm font-medium text-gray-600">
+                      E-mail para Contato:
+                    </p>
+                    <p id="revisao-email" class="text-base text-gray-900"></p>
+                  </div>
+                </div>
+
+                <div id="revisao-responsavel-container" class="hidden">
+                  <p class="text-sm font-medium text-gray-600">
+                    Responsável Técnico:
+                  </p>
+                  <p
+                    id="revisao-responsavel"
+                    class="text-base text-gray-900"
+                  ></p>
+                </div>
+
+                <div>
+                  <p class="text-sm font-medium text-gray-600 mb-2">
+                    Descrição da Solicitação:
+                  </p>
+                  <div class="bg-white border border-gray-200 rounded-lg p-4">
+                    <p
+                      id="revisao-descricao"
+                      class="text-base text-gray-900 whitespace-pre-wrap"
+                    ></p>
+                  </div>
+                </div>
+
+                <div id="revisao-anexo-container" class="hidden">
+                  <p class="text-sm font-medium text-gray-600">Anexo:</p>
+                  <p id="revisao-anexo" class="text-base text-gray-900">
+                    <i class="fas fa-file mr-2"></i>
+                    <span id="revisao-anexo-nome"></span>
+                  </p>
+                </div>
+              </div>
+
+              <div
+                class="flex justify-end space-x-4 mt-6 pt-6 border-t border-blue-200"
               >
-                <option value="">Selecione o sistema...</option>
-              </select>
-            </div>
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-2">
-                <i class="fas fa-tag mr-2 text-blue-600"></i>
-                Tipo de Produtividade *
-              </label>
-              <select
-                name="cod_tipo_produtividade"
-                id="cod_tipo_produtividade"
-                required
-                class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-              >
-                <option value="">Selecione o tipo...</option>
-              </select>
+                <button
+                  type="button"
+                  id="btnVoltarEditar"
+                  class="px-6 py-3 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
+                >
+                  <i class="fas fa-arrow-left mr-2"></i>
+                  Voltar e Editar
+                </button>
+                <button
+                  type="button"
+                  id="btnConfirmarEnviar"
+                  class="px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-lg font-medium hover:from-blue-700 hover:to-indigo-700 transition-all duration-200"
+                >
+                  <i class="fas fa-check mr-2"></i>
+                  Confirmar e Enviar
+                </button>
+              </div>
             </div>
           </div>
 
-          <!-- Dados de Contato -->
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-2">
-                <i class="fas fa-phone mr-2 text-blue-600"></i>
-                Telefone *
-              </label>
-              <input
-                type="tel"
-                name="telefone"
-                required
-                placeholder="(61) 99999-9999"
-                class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-              />
+          <!-- Seção do Formulário (inicialmente visível) -->
+          <div id="formSection">
+            <!-- Sistema e Tipo de Produtividade -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">
+                  <i class="fas fa-desktop mr-2 text-blue-600"></i>
+                  Sistema *
+                </label>
+                <select
+                  name="cod_sistema"
+                  id="cod_sistema"
+                  required
+                  class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                >
+                  <option value="">Selecione o sistema...</option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">
+                  <i class="fas fa-tag mr-2 text-blue-600"></i>
+                  Tipo de Produtividade *
+                </label>
+                <select
+                  name="cod_tipo_produtividade"
+                  id="cod_tipo_produtividade"
+                  required
+                  class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                >
+                  <option value="">Selecione o tipo...</option>
+                </select>
+              </div>
             </div>
+
+            <!-- Dados de Contato -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">
+                  <i class="fas fa-phone mr-2 text-blue-600"></i>
+                  Telefone *
+                </label>
+                <input
+                  type="tel"
+                  name="telefone"
+                  required
+                  placeholder="(61) 99999-9999"
+                  class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                />
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">
+                  <i class="fas fa-envelope mr-2 text-blue-600"></i>
+                  E-mail para Contato *
+                </label>
+                <input
+                  type="email"
+                  name="email_contato"
+                  required
+                  placeholder="seu-email@exemplo.com"
+                  value="{{ session.usuario_email }}"
+                  class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                />
+                <p class="text-xs text-gray-500 mt-1">
+                  E-mail para receber atualizações da solicitação
+                </p>
+              </div>
+            </div>
+
+            <!-- Responsável Técnico (apenas para técnicos e admins) -->
+            {% if session.usuario_tipo in ['TECNICO', 'ADMIN'] %}
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-2">
-                <i class="fas fa-envelope mr-2 text-blue-600"></i>
-                E-mail para Contato *
+                <i class="fas fa-user-cog mr-2 text-blue-600"></i>
+                Responsável pela Solicitação
               </label>
               <input
-                type="email"
-                name="email_contato"
-                required
-                placeholder="seu-email@exemplo.com"
-                value="{{ session.usuario_email }}"
+                type="text"
+                name="responsavel"
+                placeholder="Nome do técnico responsável"
                 class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
               />
               <p class="text-xs text-gray-500 mt-1">
-                E-mail para receber atualizações da solicitação
+                Nome do técnico que irá atender esta solicitação
               </p>
             </div>
-          </div>
+            {% endif %}
 
-          <!-- Responsável Técnico (apenas para técnicos e admins) -->
-          {% if session.usuario_tipo in ['TECNICO', 'ADMIN'] %}
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-2">
-              <i class="fas fa-user-cog mr-2 text-blue-600"></i>
-              Responsável pela Solicitação
-            </label>
-            <input
-              type="text"
-              name="responsavel"
-              placeholder="Nome do técnico responsável"
-              class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-            />
-            <p class="text-xs text-gray-500 mt-1">
-              Nome do técnico que irá atender esta solicitação
-            </p>
-          </div>
-          {% endif %}
-
-          <!-- Dados do Usuário Logado -->
-          <div class="bg-blue-50 p-4 rounded-lg border border-blue-200">
-            <h3 class="text-lg font-medium text-gray-900 mb-4">
-              <i class="fas fa-user-check mr-2 text-blue-600"></i>
-              Dados do Solicitante
-            </h3>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1"
-                  >Nome</label
-                >
-                <p class="text-sm text-gray-900 font-medium">
-                  {{ session.usuario_nome }}
-                </p>
-              </div>
-              <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1"
-                  >E-mail</label
-                >
-                <p class="text-sm text-gray-900">{{ session.usuario_email }}</p>
-              </div>
-              <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1"
-                  >Tipo</label
-                >
-                <span
-                  class="px-2 py-1 text-xs rounded-full {{ 'bg-green-100 text-green-800' if session.usuario_tipo == 'CLIENTE' else 'bg-blue-100 text-blue-800' }}"
-                >
-                  {{ session.usuario_tipo }}
-                </span>
-              </div>
-            </div>
-          </div>
-
-          <!-- Descrição -->
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-2">
-              <i class="fas fa-align-left mr-2 text-blue-600"></i>
-              Descrição da Solicitação *
-            </label>
-            <textarea
-              name="descricao"
-              placeholder="Descreva detalhadamente sua solicitação, problema ou dúvida..."
-              required
-              rows="5"
-              class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors resize-none"
-              minlength="10"
-            ></textarea>
-            <div class="flex justify-between items-center mt-2">
-              <p class="text-xs text-gray-500">
-                <i class="fas fa-lightbulb mr-1"></i>
-                Quanto mais detalhes, melhor será a abertura da solicitação
-              </p>
-              <span id="charCount" class="text-xs text-gray-400"
-                >0 caracteres</span
-              >
-            </div>
-          </div>
-
-          <!-- Anexo -->
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-2">
-              <i class="fas fa-paperclip mr-2 text-blue-600"></i>
-              Anexo (Opcional)
-            </label>
-            <div
-              class="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-blue-400 transition-colors"
-            >
-              <input
-                type="file"
-                name="arquivo"
-                id="arquivo"
-                accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.gif"
-                class="hidden"
-              />
-              <label for="arquivo" class="cursor-pointer">
-                <i
-                  class="fas fa-cloud-upload-alt text-3xl text-gray-400 mb-2"
-                ></i>
-                <p class="text-sm text-gray-600">
-                  <span class="text-blue-600 font-medium"
-                    >Clique para selecionar</span
+            <!-- Dados do Usuário Logado -->
+            <div class="bg-blue-50 p-4 rounded-lg border border-blue-200">
+              <h3 class="text-lg font-medium text-gray-900 mb-4">
+                <i class="fas fa-user-check mr-2 text-blue-600"></i>
+                Dados do Solicitante
+              </h3>
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-1"
+                    >Nome</label
                   >
-                  ou arraste o arquivo aqui
-                </p>
-                <p class="text-xs text-gray-500 mt-1">
-                  PDF, DOC, DOCX, JPG, PNG, GIF (máx. 10MB)
-                </p>
-              </label>
+                  <p class="text-sm text-gray-900 font-medium">
+                    {{ session.usuario_nome }}
+                  </p>
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-1"
+                    >E-mail</label
+                  >
+                  <p class="text-sm text-gray-900">
+                    {{ session.usuario_email }}
+                  </p>
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-1"
+                    >Tipo</label
+                  >
+                  <span
+                    class="px-2 py-1 text-xs rounded-full {{ 'bg-green-100 text-green-800' if session.usuario_tipo == 'CLIENTE' else 'bg-blue-100 text-blue-800' }}"
+                  >
+                    {{ session.usuario_tipo }}
+                  </span>
+                </div>
+              </div>
             </div>
-            <div id="fileInfo" class="mt-2 text-sm text-gray-600 hidden">
-              <i class="fas fa-file mr-1"></i>
-              <span id="fileName"></span>
+
+            <!-- Descrição -->
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2">
+                <i class="fas fa-align-left mr-2 text-blue-600"></i>
+                Descrição da Solicitação *
+              </label>
+              <textarea
+                name="descricao"
+                placeholder="Descreva detalhadamente sua solicitação, problema ou dúvida..."
+                required
+                rows="5"
+                class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors resize-none"
+                minlength="10"
+              ></textarea>
+              <div class="flex justify-between items-center mt-2">
+                <p class="text-xs text-gray-500">
+                  <i class="fas fa-lightbulb mr-1"></i>
+                  Quanto mais detalhes, melhor será a abertura da solicitação
+                </p>
+                <span id="charCount" class="text-xs text-gray-400"
+                  >0 caracteres</span
+                >
+              </div>
+            </div>
+
+            <!-- Anexo -->
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2">
+                <i class="fas fa-paperclip mr-2 text-blue-600"></i>
+                Anexo (Opcional)
+              </label>
+              <div
+                class="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-blue-400 transition-colors"
+              >
+                <input
+                  type="file"
+                  name="arquivo"
+                  id="arquivo"
+                  accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.gif"
+                  class="hidden"
+                />
+                <label for="arquivo" class="cursor-pointer">
+                  <i
+                    class="fas fa-cloud-upload-alt text-3xl text-gray-400 mb-2"
+                  ></i>
+                  <p class="text-sm text-gray-600">
+                    <span class="text-blue-600 font-medium"
+                      >Clique para selecionar</span
+                    >
+                    ou arraste o arquivo aqui
+                  </p>
+                  <p class="text-xs text-gray-500 mt-1">
+                    PDF, DOC, DOCX, JPG, PNG, GIF (máx. 10MB)
+                  </p>
+                </label>
+              </div>
+              <div id="fileInfo" class="mt-2 text-sm text-gray-600 hidden">
+                <i class="fas fa-file mr-1"></i>
+                <span id="fileName"></span>
+                <button
+                  type="button"
+                  id="removeFile"
+                  class="ml-2 text-red-600 hover:text-red-800"
+                >
+                  <i class="fas fa-times"></i>
+                </button>
+              </div>
+            </div>
+
+            <!-- Submit Button -->
+            <div class="flex justify-end pt-6 border-t border-gray-200">
               <button
                 type="button"
-                id="removeFile"
-                class="ml-2 text-red-600 hover:text-red-800"
+                id="btnRevisar"
+                class="bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-8 py-3 rounded-lg font-medium hover:from-blue-700 hover:to-indigo-700 focus:ring-4 focus:ring-blue-300 transition-all duration-200 flex items-center"
+                disabled
               >
-                <i class="fas fa-times"></i>
+                <i class="fas fa-eye mr-2"></i>
+                Revisar Dados
               </button>
             </div>
-          </div>
-
-          <!-- Submit Button -->
-          <div class="flex justify-end pt-6 border-t border-gray-200">
-            <button
-              type="submit"
-              id="submitBtn"
-              class="bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-8 py-3 rounded-lg font-medium hover:from-blue-700 hover:to-indigo-700 focus:ring-4 focus:ring-blue-300 transition-all duration-200 flex items-center"
-              disabled
-            >
-              <i class="fas fa-paper-plane mr-2"></i>
-              Enviar Solicitação
-            </button>
           </div>
         </form>
       </div>
@@ -330,7 +445,6 @@
       // Validação do formulário
       function validateForm() {
         const requiredFields = document.querySelectorAll("[required]");
-        const submitBtn = document.getElementById("submitBtn");
         let isValid = true;
 
         requiredFields.forEach((field) => {
@@ -371,18 +485,24 @@
           }
         }
 
-        submitBtn.disabled = !isValid;
+        const btnRevisar = document.getElementById("btnRevisar");
+        btnRevisar.disabled = !isValid;
 
         if (isValid) {
-          submitBtn.classList.remove("opacity-50", "cursor-not-allowed");
-          submitBtn.classList.add("hover:from-blue-700", "hover:to-indigo-700");
+          btnRevisar.classList.remove("opacity-50", "cursor-not-allowed");
+          btnRevisar.classList.add(
+            "hover:from-blue-700",
+            "hover:to-indigo-700"
+          );
         } else {
-          submitBtn.classList.add("opacity-50", "cursor-not-allowed");
-          submitBtn.classList.remove(
+          btnRevisar.classList.add("opacity-50", "cursor-not-allowed");
+          btnRevisar.classList.remove(
             "hover:from-blue-700",
             "hover:to-indigo-700"
           );
         }
+
+        return isValid;
       }
 
       // Contador de caracteres
@@ -440,13 +560,24 @@
         });
       }
 
-      // Carregar sistemas e tipos de produtividade
+      // Validar campos obrigatórios
+      document.querySelectorAll("[required]").forEach((field) => {
+        field.addEventListener("input", validateForm);
+        field.addEventListener("change", validateForm);
+      });
+
+      // Variáveis globais para armazenar dados dos selects
+      let sistemasData = [];
+      let tiposProdutividadeData = [];
+
+      // Atualizar dados ao carregar
       async function carregarSistemas() {
         try {
           const response = await fetch("/api/v1/sistemas");
           const data = await response.json();
 
           if (data.success && data.data) {
+            sistemasData = data.data;
             const select = document.getElementById("cod_sistema");
             data.data.forEach((sistema) => {
               const option = document.createElement("option");
@@ -466,6 +597,7 @@
           const data = await response.json();
 
           if (data.success && data.data) {
+            tiposProdutividadeData = data.data;
             const select = document.getElementById("cod_tipo_produtividade");
             data.data.forEach((tipo) => {
               const option = document.createElement("option");
@@ -479,6 +611,195 @@
         }
       }
 
+      // Função para preencher dados de revisão
+      function preencherRevisao() {
+        // Sistema
+        const codSistema = document.getElementById("cod_sistema").value;
+        const sistema = sistemasData.find((s) => s.CODSISTEMA == codSistema);
+        document.getElementById("revisao-sistema").textContent = sistema
+          ? sistema.DESCRICAO
+          : "Não selecionado";
+
+        // Tipo de Produtividade
+        const codTipo = document.getElementById("cod_tipo_produtividade").value;
+        const tipo = tiposProdutividadeData.find(
+          (t) => t.CODTIPOPRODUTIVIDADE == codTipo
+        );
+        document.getElementById("revisao-tipo").textContent = tipo
+          ? tipo.DESCRICAO
+          : "Não selecionado";
+
+        // Telefone
+        const telefone = document.querySelector('input[name="telefone"]').value;
+        document.getElementById("revisao-telefone").textContent =
+          telefone || "Não informado";
+
+        // Email
+        const email = document.querySelector(
+          'input[name="email_contato"]'
+        ).value;
+        document.getElementById("revisao-email").textContent =
+          email || "Não informado";
+
+        // Responsável Técnico (se existir)
+        const responsavel = document.querySelector('input[name="responsavel"]');
+        if (responsavel && responsavel.value) {
+          document.getElementById("revisao-responsavel").textContent =
+            responsavel.value;
+          document
+            .getElementById("revisao-responsavel-container")
+            .classList.remove("hidden");
+        } else {
+          document
+            .getElementById("revisao-responsavel-container")
+            .classList.add("hidden");
+        }
+
+        // Descrição
+        const descricao = document.querySelector(
+          'textarea[name="descricao"]'
+        ).value;
+        document.getElementById("revisao-descricao").textContent =
+          descricao || "Não informado";
+
+        // Anexo
+        const arquivoInput = document.getElementById("arquivo");
+        if (arquivoInput.files.length > 0) {
+          document.getElementById("revisao-anexo-nome").textContent =
+            arquivoInput.files[0].name;
+          document
+            .getElementById("revisao-anexo-container")
+            .classList.remove("hidden");
+        } else {
+          document
+            .getElementById("revisao-anexo-container")
+            .classList.add("hidden");
+        }
+      }
+
+      // Função para mostrar revisão
+      function mostrarRevisao() {
+        if (!validateForm()) {
+          alert(
+            "Por favor, preencha todos os campos obrigatórios corretamente."
+          );
+          return;
+        }
+
+        preencherRevisao();
+
+        // Esconde formulário e mostra revisão
+        document.getElementById("formSection").classList.add("hidden");
+        document.getElementById("revisaoSection").classList.remove("hidden");
+
+        // Atualiza indicador de progresso
+        document
+          .getElementById("step1")
+          .classList.remove("bg-blue-600", "text-white");
+        document
+          .getElementById("step1")
+          .classList.add("bg-green-500", "text-white");
+        document.getElementById("step1-line").classList.remove("bg-blue-600");
+        document.getElementById("step1-line").classList.add("bg-green-500");
+        document
+          .getElementById("step1-label")
+          .classList.remove("text-blue-600", "font-medium");
+        document.getElementById("step1-label").classList.add("text-green-600");
+
+        document
+          .getElementById("step2")
+          .classList.remove("bg-gray-300", "text-gray-500");
+        document
+          .getElementById("step2")
+          .classList.add("bg-blue-600", "text-white");
+        document.getElementById("step2-line").classList.remove("bg-gray-300");
+        document.getElementById("step2-line").classList.add("bg-blue-600");
+        document
+          .getElementById("step2-label")
+          .classList.remove("text-gray-500");
+        document
+          .getElementById("step2-label")
+          .classList.add("text-blue-600", "font-medium");
+      }
+
+      // Função para voltar ao formulário
+      function voltarAoFormulario() {
+        document.getElementById("formSection").classList.remove("hidden");
+        document.getElementById("revisaoSection").classList.add("hidden");
+
+        // Atualiza indicador de progresso
+        document.getElementById("step1").classList.remove("bg-green-500");
+        document.getElementById("step1").classList.add("bg-blue-600");
+        document.getElementById("step1-line").classList.remove("bg-green-500");
+        document.getElementById("step1-line").classList.add("bg-blue-600");
+        document
+          .getElementById("step1-label")
+          .classList.remove("text-green-600");
+        document
+          .getElementById("step1-label")
+          .classList.add("text-blue-600", "font-medium");
+
+        document
+          .getElementById("step2")
+          .classList.remove("bg-blue-600", "text-white");
+        document
+          .getElementById("step2")
+          .classList.add("bg-gray-300", "text-gray-500");
+        document.getElementById("step2-line").classList.remove("bg-blue-600");
+        document.getElementById("step2-line").classList.add("bg-gray-300");
+        document
+          .getElementById("step2-label")
+          .classList.remove("text-blue-600", "font-medium");
+        document.getElementById("step2-label").classList.add("text-gray-500");
+      }
+
+      // Função para confirmar e enviar
+      function confirmarEnviar() {
+        const loadingOverlay = document.getElementById("loadingOverlay");
+        loadingOverlay.classList.remove("hidden");
+
+        // Atualiza indicador de progresso para confirmação
+        document
+          .getElementById("step2")
+          .classList.remove("bg-blue-600", "text-white");
+        document
+          .getElementById("step2")
+          .classList.add("bg-green-500", "text-white");
+        document.getElementById("step2-line").classList.remove("bg-blue-600");
+        document.getElementById("step2-line").classList.add("bg-green-500");
+        document
+          .getElementById("step2-label")
+          .classList.remove("text-blue-600", "font-medium");
+        document.getElementById("step2-label").classList.add("text-green-600");
+
+        document
+          .getElementById("step3")
+          .classList.remove("bg-gray-300", "text-gray-500");
+        document
+          .getElementById("step3")
+          .classList.add("bg-blue-600", "text-white");
+        document
+          .getElementById("step3-label")
+          .classList.remove("text-gray-500");
+        document
+          .getElementById("step3-label")
+          .classList.add("text-blue-600", "font-medium");
+
+        // Envia o formulário
+        document.getElementById("solicitacaoForm").submit();
+      }
+
+      // Event listeners
+      document
+        .getElementById("btnRevisar")
+        .addEventListener("click", mostrarRevisao);
+      document
+        .getElementById("btnVoltarEditar")
+        .addEventListener("click", voltarAoFormulario);
+      document
+        .getElementById("btnConfirmarEnviar")
+        .addEventListener("click", confirmarEnviar);
+
       // Carregar dados ao inicializar
       document.addEventListener("DOMContentLoaded", function () {
         carregarSistemas();
@@ -490,14 +811,6 @@
         field.addEventListener("input", validateForm);
         field.addEventListener("change", validateForm);
       });
-
-      // Submit do formulário
-      document
-        .getElementById("solicitacaoForm")
-        .addEventListener("submit", function (e) {
-          const loadingOverlay = document.getElementById("loadingOverlay");
-          loadingOverlay.classList.remove("hidden");
-        });
 
       // Inicializar validação
       validateForm();
