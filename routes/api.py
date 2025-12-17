@@ -480,6 +480,398 @@ def listar_tipos_produtividade():
             'error': str(e)
         }), 500
 
+@api_bp.route('/tipos-produtividade/<int:sistema_id>', methods=['GET'])
+def listar_tipos_produtividade_por_sistema(sistema_id):
+    """Lista tipos de produtividade vinculados a um sistema específico"""
+    try:
+        with db_connection() as con:
+            cur = con.cursor()
+            cur.execute("""
+                SELECT DISTINCT tp.CODTIPOPRODUTIVIDADE, tp.DESCRICAO, tp.PONTOS, tp.TIPO
+                FROM TIPOPRODUTIVIDADE tp
+                INNER JOIN SISTEMA_TIPO_PRODUTIVIDADE stp ON tp.CODTIPOPRODUTIVIDADE = stp.CODTIPOPRODUTIVIDADE
+                WHERE stp.CODSISTEMA = ? AND stp.ATIVO IS TRUE
+                ORDER BY tp.DESCRICAO
+            """, (sistema_id,))
+            
+            columns = [description[0] for description in cur.description]
+            tipos = []
+            for row in cur:
+                tipo = {}
+                for i, column in enumerate(columns):
+                    value = row[i]
+                    if isinstance(value, bytes):
+                        try:
+                            value = value.decode('utf-8')
+                        except:
+                            try:
+                                value = value.decode('latin-1')
+                            except:
+                                value = str(value)
+                    tipo[column] = value
+                tipos.append(tipo)
+        
+        return jsonify({
+            'success': True,
+            'data': tipos
+        })
+        
+    except Exception as e:
+        import traceback
+        error_trace = traceback.format_exc()
+        print(f"Erro ao listar tipos de produtividade por sistema: {error_trace}")
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+@api_bp.route('/sistemas', methods=['POST'])
+def criar_sistema():
+    """Cria um novo sistema"""
+    try:
+        dados = request.get_json()
+        
+        if not dados.get('DESCRICAO'):
+            return jsonify({
+                'success': False,
+                'error': 'Descrição é obrigatória'
+            }), 400
+        
+        sistema_model = BaseModel()
+        sistema_model.table_name = 'SISTEMAS'
+        
+        sistema_id = sistema_model.create({
+            'DESCRICAO': dados['DESCRICAO']
+        })
+        
+        return jsonify({
+            'success': True,
+            'data': {'ID': sistema_id}
+        }), 201
+        
+    except Exception as e:
+        import traceback
+        error_trace = traceback.format_exc()
+        print(f"Erro ao criar sistema: {error_trace}")
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+@api_bp.route('/sistemas/<int:sistema_id>', methods=['PUT'])
+def atualizar_sistema(sistema_id):
+    """Atualiza um sistema"""
+    try:
+        dados = request.get_json()
+        
+        sistema_model = BaseModel()
+        sistema_model.table_name = 'SISTEMAS'
+        sistema_model.primary_key = 'CODSISTEMA'
+        
+        update_data = {}
+        if 'DESCRICAO' in dados:
+            update_data['DESCRICAO'] = dados['DESCRICAO']
+        
+        if update_data:
+            sistema_model.update(sistema_id, update_data)
+        
+        return jsonify({
+            'success': True,
+            'message': 'Sistema atualizado com sucesso'
+        })
+        
+    except Exception as e:
+        import traceback
+        error_trace = traceback.format_exc()
+        print(f"Erro ao atualizar sistema: {error_trace}")
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+@api_bp.route('/sistemas/<int:sistema_id>', methods=['DELETE'])
+def excluir_sistema(sistema_id):
+    """Exclui um sistema"""
+    try:
+        sistema_model = BaseModel()
+        sistema_model.table_name = 'SISTEMAS'
+        sistema_model.primary_key = 'CODSISTEMA'
+        
+        sistema_model.delete(sistema_id)
+        
+        return jsonify({
+            'success': True,
+            'message': 'Sistema excluído com sucesso'
+        })
+        
+    except Exception as e:
+        import traceback
+        error_trace = traceback.format_exc()
+        print(f"Erro ao excluir sistema: {error_trace}")
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+@api_bp.route('/tipos-produtividade', methods=['POST'])
+def criar_tipo_produtividade():
+    """Cria um novo tipo de produtividade"""
+    try:
+        dados = request.get_json()
+        
+        if not dados.get('DESCRICAO') or dados.get('TIPO') is None:
+            return jsonify({
+                'success': False,
+                'error': 'Descrição e Tipo são obrigatórios'
+            }), 400
+        
+        tipo_model = BaseModel()
+        tipo_model.table_name = 'TIPOPRODUTIVIDADE'
+        
+        tipo_id = tipo_model.create({
+            'DESCRICAO': dados['DESCRICAO'],
+            'PONTOS': dados.get('PONTOS', 0),
+            'TIPO': dados['TIPO']
+        })
+        
+        return jsonify({
+            'success': True,
+            'data': {'ID': tipo_id}
+        }), 201
+        
+    except Exception as e:
+        import traceback
+        error_trace = traceback.format_exc()
+        print(f"Erro ao criar tipo de produtividade: {error_trace}")
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+@api_bp.route('/tipos-produtividade/<int:tipo_id>', methods=['PUT'])
+def atualizar_tipo_produtividade(tipo_id):
+    """Atualiza um tipo de produtividade"""
+    try:
+        dados = request.get_json()
+        
+        tipo_model = BaseModel()
+        tipo_model.table_name = 'TIPOPRODUTIVIDADE'
+        tipo_model.primary_key = 'CODTIPOPRODUTIVIDADE'
+        
+        update_data = {}
+        if 'DESCRICAO' in dados:
+            update_data['DESCRICAO'] = dados['DESCRICAO']
+        if 'PONTOS' in dados:
+            update_data['PONTOS'] = dados['PONTOS']
+        if 'TIPO' in dados:
+            update_data['TIPO'] = dados['TIPO']
+        
+        if update_data:
+            tipo_model.update(tipo_id, update_data)
+        
+        return jsonify({
+            'success': True,
+            'message': 'Tipo de produtividade atualizado com sucesso'
+        })
+        
+    except Exception as e:
+        import traceback
+        error_trace = traceback.format_exc()
+        print(f"Erro ao atualizar tipo de produtividade: {error_trace}")
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+@api_bp.route('/tipos-produtividade/<int:tipo_id>', methods=['DELETE'])
+def excluir_tipo_produtividade(tipo_id):
+    """Exclui um tipo de produtividade"""
+    try:
+        tipo_model = BaseModel()
+        tipo_model.table_name = 'TIPOPRODUTIVIDADE'
+        tipo_model.primary_key = 'CODTIPOPRODUTIVIDADE'
+        
+        tipo_model.delete(tipo_id)
+        
+        return jsonify({
+            'success': True,
+            'message': 'Tipo de produtividade excluído com sucesso'
+        })
+        
+    except Exception as e:
+        import traceback
+        error_trace = traceback.format_exc()
+        print(f"Erro ao excluir tipo de produtividade: {error_trace}")
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+@api_bp.route('/sistema-tipo-produtividade', methods=['GET'])
+def listar_vinculos():
+    """Lista todos os vínculos entre sistemas e tipos de produtividade"""
+    try:
+        with db_connection() as con:
+            cur = con.cursor()
+            cur.execute("""
+                SELECT 
+                    stp.ID,
+                    stp.CODSISTEMA,
+                    stp.CODTIPOPRODUTIVIDADE,
+                    CASE WHEN stp.ATIVO IS TRUE THEN 1 ELSE 0 END as ATIVO,
+                    s.DESCRICAO as DESCRICAO_SISTEMA,
+                    tp.DESCRICAO as DESCRICAO_TIPO
+                FROM SISTEMA_TIPO_PRODUTIVIDADE stp
+                JOIN SISTEMAS s ON stp.CODSISTEMA = s.CODSISTEMA
+                JOIN TIPOPRODUTIVIDADE tp ON stp.CODTIPOPRODUTIVIDADE = tp.CODTIPOPRODUTIVIDADE
+                ORDER BY s.DESCRICAO, tp.DESCRICAO
+            """)
+            
+            rows = cur.fetchall()
+            if rows:
+                columns = [description[0] for description in cur.description]
+                vinculos = []
+                for row in rows:
+                    vinculo = {}
+                    for i, column in enumerate(columns):
+                        value = row[i]
+                        if isinstance(value, bytes):
+                            try:
+                                value = value.decode('utf-8')
+                            except:
+                                try:
+                                    value = value.decode('latin-1')
+                                except:
+                                    value = str(value)
+                        vinculo[column] = value
+                    vinculos.append(vinculo)
+            else:
+                vinculos = []
+        
+        return jsonify({
+            'success': True,
+            'data': vinculos
+        })
+        
+    except Exception as e:
+        import traceback
+        error_trace = traceback.format_exc()
+        print(f"Erro ao listar vínculos: {error_trace}")
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+@api_bp.route('/sistema-tipo-produtividade', methods=['POST'])
+def criar_vinculo():
+    """Cria um vínculo entre sistema e tipo de produtividade"""
+    try:
+        dados = request.get_json()
+        
+        if not dados.get('CODSISTEMA') or not dados.get('CODTIPOPRODUTIVIDADE'):
+            return jsonify({
+                'success': False,
+                'error': 'CODSISTEMA e CODTIPOPRODUTIVIDADE são obrigatórios'
+            }), 400
+        
+        vinculo_model = BaseModel()
+        vinculo_model.table_name = 'SISTEMA_TIPO_PRODUTIVIDADE'
+        
+        vinculo_id = vinculo_model.create({
+            'CODSISTEMA': dados['CODSISTEMA'],
+            'CODTIPOPRODUTIVIDADE': dados['CODTIPOPRODUTIVIDADE'],
+            'ATIVO': dados.get('ATIVO', True)
+        })
+        
+        return jsonify({
+            'success': True,
+            'data': {'ID': vinculo_id}
+        }), 201
+        
+    except Exception as e:
+        import traceback
+        error_trace = traceback.format_exc()
+        print(f"Erro ao criar vínculo: {error_trace}")
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+@api_bp.route('/sistema-tipo-produtividade/batch', methods=['POST'])
+def criar_vinculos_batch():
+    """Cria múltiplos vínculos entre um sistema e tipos de produtividade"""
+    try:
+        dados = request.get_json()
+        
+        if not dados.get('CODSISTEMA') or not dados.get('TIPOS'):
+            return jsonify({
+                'success': False,
+                'error': 'CODSISTEMA e TIPOS são obrigatórios'
+            }), 400
+        
+        sistema_id = dados['CODSISTEMA']
+        tipos = dados['TIPOS']
+        
+        if not isinstance(tipos, list) or len(tipos) == 0:
+            return jsonify({
+                'success': False,
+                'error': 'TIPOS deve ser uma lista com pelo menos um item'
+            }), 400
+        
+        created = 0
+        errors = []
+        
+        with db_connection() as con:
+            cur = con.cursor()
+            for tipo_id in tipos:
+                try:
+                    cur.execute("""
+                        INSERT INTO SISTEMA_TIPO_PRODUTIVIDADE (CODSISTEMA, CODTIPOPRODUTIVIDADE, ATIVO)
+                        VALUES (?, ?, TRUE)
+                    """, (sistema_id, tipo_id))
+                    created += 1
+                except Exception as e:
+                    errors.append(f"Tipo {tipo_id}: {str(e)}")
+            con.commit()
+        
+        return jsonify({
+            'success': True,
+            'created': created,
+            'errors': errors if errors else None
+        }), 201
+        
+    except Exception as e:
+        import traceback
+        error_trace = traceback.format_exc()
+        print(f"Erro ao criar vínculos em batch: {error_trace}")
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+@api_bp.route('/sistema-tipo-produtividade/<int:vinculo_id>', methods=['DELETE'])
+def excluir_vinculo(vinculo_id):
+    """Exclui um vínculo entre sistema e tipo de produtividade"""
+    try:
+        vinculo_model = BaseModel()
+        vinculo_model.table_name = 'SISTEMA_TIPO_PRODUTIVIDADE'
+        
+        vinculo_model.delete(vinculo_id)
+        
+        return jsonify({
+            'success': True,
+            'message': 'Vínculo excluído com sucesso'
+        })
+        
+    except Exception as e:
+        import traceback
+        error_trace = traceback.format_exc()
+        print(f"Erro ao excluir vínculo: {error_trace}")
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
 # =====================================================
 # ENDPOINTS DE HISTÓRICO
 # =====================================================
@@ -566,13 +958,29 @@ def admin_stats():
             cur.execute("SELECT COUNT(*) FROM TEMPLATES_EMAIL WHERE ATIVO = TRUE")
             total_templates = cur.fetchone()[0]
             
+            # Conta sistemas
+            try:
+                cur.execute("SELECT COUNT(*) FROM SISTEMAS")
+                total_sistemas = cur.fetchone()[0]
+            except:
+                total_sistemas = 0
+            
+            # Conta tipos de produtividade
+            try:
+                cur.execute("SELECT COUNT(*) FROM TIPOPRODUTIVIDADE")
+                total_tipos_produtividade = cur.fetchone()[0]
+            except:
+                total_tipos_produtividade = 0
+            
             return jsonify({
                 'success': True,
                 'data': {
                     'usuarios': total_usuarios,
                     'categorias': total_categorias,
                     'status': total_status,
-                    'templates': total_templates
+                    'templates': total_templates,
+                    'sistemas': total_sistemas,
+                    'tipos_produtividade': total_tipos_produtividade
                 }
             })
             

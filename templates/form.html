@@ -26,9 +26,19 @@
               </p>
             </div>
           </div>
-          <div class="text-right">
-            <p class="text-sm text-gray-600">Suporte Técnico</p>
-            <p class="text-xs text-gray-500">24/7</p>
+          <div class="flex items-center space-x-4">
+            <div class="text-right">
+              <p class="text-sm text-gray-600">Suporte Técnico</p>
+              <p class="text-xs text-gray-500">24/7</p>
+            </div>
+            <a
+              href="/logout"
+              class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors flex items-center"
+              title="Sair e voltar ao login"
+            >
+              <i class="fas fa-sign-out-alt mr-2"></i>
+              Sair
+            </a>
           </div>
         </div>
       </div>
@@ -234,10 +244,14 @@
                   name="cod_tipo_produtividade"
                   id="cod_tipo_produtividade"
                   required
-                  class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                  disabled
+                  class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors bg-gray-100"
                 >
-                  <option value="">Selecione o tipo...</option>
+                  <option value="">Selecione um sistema primeiro...</option>
                 </select>
+                <p class="text-xs text-gray-500 mt-1">
+                  Selecione um sistema para ver os tipos disponíveis
+                </p>
               </div>
             </div>
 
@@ -463,7 +477,13 @@
         const codTipoProdutividade = document.getElementById(
           "cod_tipo_produtividade"
         );
-        if (!codSistema.value || !codTipoProdutividade.value) {
+        if (
+          !codSistema ||
+          !codSistema.value ||
+          !codTipoProdutividade ||
+          !codTipoProdutividade.value ||
+          codTipoProdutividade.disabled
+        ) {
           isValid = false;
         }
 
@@ -591,23 +611,52 @@
         }
       }
 
-      async function carregarTiposProdutividade() {
+      async function carregarTiposProdutividade(sistemaId) {
         try {
-          const response = await fetch("/api/v1/tipos-produtividade");
+          if (!sistemaId) {
+            return;
+          }
+
+          const url = `/api/v1/tipos-produtividade/${sistemaId}`;
+          const response = await fetch(url);
           const data = await response.json();
 
-          if (data.success && data.data) {
-            tiposProdutividadeData = data.data;
-            const select = document.getElementById("cod_tipo_produtividade");
-            data.data.forEach((tipo) => {
-              const option = document.createElement("option");
-              option.value = tipo.CODTIPOPRODUTIVIDADE;
-              option.textContent = tipo.DESCRICAO;
-              select.appendChild(option);
-            });
+          const select = document.getElementById("cod_tipo_produtividade");
+          if (select) {
+            if (data.success && data.data && data.data.length > 0) {
+              tiposProdutividadeData = data.data;
+              // Limpa opções existentes
+              select.innerHTML =
+                '<option value="">Selecione o tipo...</option>';
+
+              // Habilita o select
+              select.disabled = false;
+              select.classList.remove("bg-gray-100");
+
+              data.data.forEach((tipo) => {
+                const option = document.createElement("option");
+                option.value = tipo.CODTIPOPRODUTIVIDADE;
+                option.textContent = tipo.DESCRICAO;
+                select.appendChild(option);
+              });
+            } else {
+              // Se não houver tipos vinculados
+              select.innerHTML =
+                '<option value="">Nenhum tipo disponível para este sistema</option>';
+              select.disabled = true;
+              select.classList.add("bg-gray-100");
+              tiposProdutividadeData = [];
+            }
           }
         } catch (error) {
           console.error("Erro ao carregar tipos de produtividade:", error);
+          const select = document.getElementById("cod_tipo_produtividade");
+          if (select) {
+            select.innerHTML =
+              '<option value="">Erro ao carregar tipos</option>';
+            select.disabled = true;
+            select.classList.add("bg-gray-100");
+          }
         }
       }
 
@@ -803,7 +852,38 @@
       // Carregar dados ao inicializar
       document.addEventListener("DOMContentLoaded", function () {
         carregarSistemas();
-        carregarTiposProdutividade();
+        // Não carrega tipos inicialmente - só quando um sistema for selecionado
+
+        // Adicionar listener para mudança de sistema
+        const selectSistema = document.getElementById("cod_sistema");
+        if (selectSistema) {
+          selectSistema.addEventListener("change", function () {
+            const sistemaId = this.value;
+            const selectTipo = document.getElementById(
+              "cod_tipo_produtividade"
+            );
+
+            if (sistemaId) {
+              // Carrega apenas os tipos vinculados ao sistema selecionado
+              carregarTiposProdutividade(sistemaId);
+            } else {
+              // Se nenhum sistema selecionado, limpa os tipos
+              if (selectTipo) {
+                selectTipo.innerHTML =
+                  '<option value="">Selecione um sistema primeiro...</option>';
+                selectTipo.disabled = true;
+              }
+            }
+          });
+        }
+
+        // Desabilita o select de tipo inicialmente
+        const selectTipo = document.getElementById("cod_tipo_produtividade");
+        if (selectTipo) {
+          selectTipo.innerHTML =
+            '<option value="">Selecione um sistema primeiro...</option>';
+          selectTipo.disabled = true;
+        }
       });
 
       // Validar campos obrigatórios

@@ -47,14 +47,46 @@ class BaseModel:
         fields = list(data.keys())
         placeholders = ', '.join(['?' for _ in fields])
         field_names = ', '.join(fields)
-        
-        query = f"INSERT INTO {self.table_name} ({field_names}) VALUES ({placeholders})"
+        values = list(data.values())
         
         with db_connection() as con:
             cur = con.cursor()
-            cur.execute(query, list(data.values()))
-            con.commit()
-            return cur.lastrowid
+            
+            # Tenta usar RETURNING primeiro (Firebird 3.0+)
+            try:
+                query = f"INSERT INTO {self.table_name} ({field_names}) VALUES ({placeholders}) RETURNING {self.primary_key}"
+                cur.execute(query, values)
+                result = cur.fetchone()
+                con.commit()
+                if result and result[0] is not None:
+                    return result[0]
+                # Se RETURNING não retornou resultado, o INSERT já foi feito, então busca o ID
+            except Exception as e:
+                # Se RETURNING não funcionar, faz INSERT normal
+                query = f"INSERT INTO {self.table_name} ({field_names}) VALUES ({placeholders})"
+                cur.execute(query, values)
+                con.commit()
+            
+            # Busca o ID usando os campos fornecidos (fallback ou quando RETURNING não retorna)
+            where_clauses = []
+            where_values = []
+            
+            # Usa os campos fornecidos para buscar o registro recém-criado
+            for key, value in data.items():
+                if value is not None:
+                    where_clauses.append(f"{key} = ?")
+                    where_values.append(value)
+            
+            if where_clauses:
+                where_clause = " AND ".join(where_clauses)
+                select_query = f"SELECT {self.primary_key} FROM {self.table_name} WHERE {where_clause} ORDER BY {self.primary_key} DESC"
+                cur.execute(select_query, where_values)
+                result = cur.fetchone()
+                if result and result[0] is not None:
+                    return result[0]
+            
+            # Se não conseguir obter o ID, retorna None
+            return None
     
     def update(self, id, data):
         """Atualiza um registro existente"""

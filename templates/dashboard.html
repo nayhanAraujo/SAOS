@@ -320,246 +320,377 @@
             </p>
           </div>
 
-          <!-- Form -->
-          <form id="form-nova-solicitacao" class="p-6 space-y-6">
-            <!-- Sistema e Tipo -->
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2">
-                  <i class="fas fa-desktop mr-2 text-blue-600"></i>
-                  Sistema
-                </label>
-                <select
-                  name="sistema"
-                  required
-                  class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+          <!-- Progress Steps -->
+          <div class="px-6 pt-6 pb-4">
+            <div class="flex items-center justify-center">
+              <div class="flex items-center">
+                <div
+                  id="modal-step1"
+                  class="bg-blue-600 text-white rounded-full h-10 w-10 flex items-center justify-center transition-colors"
                 >
-                  <option value="">Selecione o sistema...</option>
-                  <option value="Sistema Principal">Laudos Flex</option>
-                  <option value="Portal Web">Laudos UX</option>
-
-                  <option value="Outro">Outro</option>
-                </select>
+                  <i class="fas fa-file-alt"></i>
+                </div>
+                <div
+                  id="modal-step1-line"
+                  class="bg-blue-600 h-1 w-16 transition-colors"
+                ></div>
+                <div
+                  id="modal-step2"
+                  class="bg-gray-300 text-gray-500 rounded-full h-10 w-10 flex items-center justify-center transition-colors"
+                >
+                  <i class="fas fa-eye"></i>
+                </div>
+                <div
+                  id="modal-step2-line"
+                  class="bg-gray-300 h-1 w-16 transition-colors"
+                ></div>
+                <div
+                  id="modal-step3"
+                  class="bg-gray-300 text-gray-500 rounded-full h-10 w-10 flex items-center justify-center transition-colors"
+                >
+                  <i class="fas fa-check"></i>
+                </div>
               </div>
+            </div>
+            <div class="flex justify-center mt-2 space-x-8">
+              <span
+                id="modal-step1-label"
+                class="text-sm font-medium text-blue-600"
+                >Preencha os dados</span
+              >
+              <span id="modal-step2-label" class="text-sm text-gray-500"
+                >Revisão</span
+              >
+              <span id="modal-step3-label" class="text-sm text-gray-500"
+                >Confirmação</span
+              >
+            </div>
+          </div>
+
+          <!-- Form -->
+          <form
+            id="form-nova-solicitacao"
+            class="p-6 space-y-6"
+            enctype="multipart/form-data"
+          >
+            <!-- Seção de Revisão (inicialmente oculta) -->
+            <div id="modal-revisaoSection" class="hidden">
+              <div
+                class="bg-blue-50 border border-blue-200 rounded-lg p-6 mb-6"
+              >
+                <h3 class="text-lg font-semibold text-gray-900 mb-4">
+                  <i class="fas fa-eye mr-2 text-blue-600"></i>
+                  Revise os dados antes de enviar
+                </h3>
+
+                <div class="space-y-4">
+                  <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <p class="text-sm font-medium text-gray-600">Sistema:</p>
+                      <p
+                        id="modal-revisao-sistema"
+                        class="text-base text-gray-900"
+                      ></p>
+                    </div>
+                    <div>
+                      <p class="text-sm font-medium text-gray-600">
+                        Tipo de Produtividade:
+                      </p>
+                      <p
+                        id="modal-revisao-tipo"
+                        class="text-base text-gray-900"
+                      ></p>
+                    </div>
+                  </div>
+
+                  <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <p class="text-sm font-medium text-gray-600">Telefone:</p>
+                      <p
+                        id="modal-revisao-telefone"
+                        class="text-base text-gray-900"
+                      ></p>
+                    </div>
+                    <div>
+                      <p class="text-sm font-medium text-gray-600">
+                        E-mail para Contato:
+                      </p>
+                      <p
+                        id="modal-revisao-email"
+                        class="text-base text-gray-900"
+                      ></p>
+                    </div>
+                  </div>
+
+                  <div id="modal-revisao-responsavel-container" class="hidden">
+                    <p class="text-sm font-medium text-gray-600">
+                      Responsável Técnico:
+                    </p>
+                    <p
+                      id="modal-revisao-responsavel"
+                      class="text-base text-gray-900"
+                    ></p>
+                  </div>
+
+                  <div>
+                    <p class="text-sm font-medium text-gray-600 mb-2">
+                      Descrição da Solicitação:
+                    </p>
+                    <div class="bg-white border border-gray-200 rounded-lg p-4">
+                      <p
+                        id="modal-revisao-descricao"
+                        class="text-base text-gray-900 whitespace-pre-wrap"
+                      ></p>
+                    </div>
+                  </div>
+
+                  <div id="modal-revisao-anexo-container" class="hidden">
+                    <p class="text-sm font-medium text-gray-600">Anexo:</p>
+                    <p id="modal-revisao-anexo" class="text-base text-gray-900">
+                      <i class="fas fa-file mr-2"></i>
+                      <span id="modal-revisao-anexo-nome"></span>
+                    </p>
+                  </div>
+                </div>
+
+                <div
+                  class="flex justify-end space-x-4 mt-6 pt-6 border-t border-blue-200"
+                >
+                  <button
+                    type="button"
+                    id="modal-btnVoltarEditar"
+                    class="px-6 py-3 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
+                  >
+                    <i class="fas fa-arrow-left mr-2"></i>
+                    Voltar e Editar
+                  </button>
+                  <button
+                    type="button"
+                    id="modal-btnConfirmarEnviar"
+                    class="px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-lg font-medium hover:from-blue-700 hover:to-indigo-700 transition-all duration-200"
+                  >
+                    <i class="fas fa-check mr-2"></i>
+                    Confirmar e Enviar
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Seção do Formulário (inicialmente visível) -->
+            <div id="modal-formSection">
+              <!-- Sistema e Tipo de Produtividade -->
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-2">
+                    <i class="fas fa-desktop mr-2 text-blue-600"></i>
+                    Sistema *
+                  </label>
+                  <select
+                    name="cod_sistema"
+                    id="modal-cod_sistema"
+                    required
+                    class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                  >
+                    <option value="">Selecione o sistema...</option>
+                  </select>
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-2">
+                    <i class="fas fa-tag mr-2 text-blue-600"></i>
+                    Tipo de Produtividade *
+                  </label>
+                  <select
+                    name="cod_tipo_produtividade"
+                    id="modal-cod_tipo_produtividade"
+                    required
+                    disabled
+                    class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors bg-gray-100"
+                  >
+                    <option value="">Selecione um sistema primeiro...</option>
+                  </select>
+                  <p class="text-xs text-gray-500 mt-1">
+                    Selecione um sistema para ver os tipos disponíveis
+                  </p>
+                </div>
+              </div>
+
+              <!-- Dados de Contato -->
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-2">
+                    <i class="fas fa-phone mr-2 text-blue-600"></i>
+                    Telefone *
+                  </label>
+                  <input
+                    type="tel"
+                    name="telefone"
+                    required
+                    placeholder="(61) 99999-9999"
+                    class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                  />
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-2">
+                    <i class="fas fa-envelope mr-2 text-blue-600"></i>
+                    E-mail para Contato *
+                  </label>
+                  <input
+                    type="email"
+                    name="email_contato"
+                    required
+                    placeholder="seu-email@exemplo.com"
+                    value="{{ session.usuario_email }}"
+                    class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                  />
+                  <p class="text-xs text-gray-500 mt-1">
+                    E-mail para receber atualizações da solicitação
+                  </p>
+                </div>
+              </div>
+
+              <!-- Responsável Técnico (apenas para técnicos e admins) -->
+              {% if session.usuario_tipo in ['TECNICO', 'ADMIN'] %}
               <div>
                 <label class="block text-sm font-medium text-gray-700 mb-2">
-                  <i class="fas fa-tag mr-2 text-blue-600"></i>
-                  Tipos de Solicitação *
+                  <i class="fas fa-user-cog mr-2 text-blue-600"></i>
+                  Responsável pela Solicitação
+                </label>
+                <input
+                  type="text"
+                  name="responsavel"
+                  placeholder="Nome do técnico responsável"
+                  class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                />
+                <p class="text-xs text-gray-500 mt-1">
+                  Nome do técnico que irá atender esta solicitação
+                </p>
+              </div>
+              {% endif %}
+
+              <!-- Dados do Usuário Logado -->
+              <div class="bg-blue-50 p-4 rounded-lg border border-blue-200">
+                <h3 class="text-lg font-medium text-gray-900 mb-4">
+                  <i class="fas fa-user-check mr-2 text-blue-600"></i>
+                  Dados do Solicitante
+                </h3>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1"
+                      >Nome</label
+                    >
+                    <p class="text-sm text-gray-900 font-medium">
+                      {{ session.usuario_nome }}
+                    </p>
+                  </div>
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1"
+                      >E-mail</label
+                    >
+                    <p class="text-sm text-gray-900">
+                      {{ session.usuario_email }}
+                    </p>
+                  </div>
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1"
+                      >Tipo</label
+                    >
+                    <span
+                      class="px-2 py-1 text-xs rounded-full {{ 'bg-green-100 text-green-800' if session.usuario_tipo == 'CLIENTE' else 'bg-blue-100 text-blue-800' }}"
+                    >
+                      {{ session.usuario_tipo }}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Descrição -->
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">
+                  <i class="fas fa-align-left mr-2 text-blue-600"></i>
+                  Descrição da Solicitação *
+                </label>
+                <textarea
+                  name="descricao"
+                  placeholder="Descreva detalhadamente sua solicitação, problema ou dúvida..."
+                  required
+                  rows="5"
+                  class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors resize-none"
+                  minlength="10"
+                ></textarea>
+                <div class="flex justify-between items-center mt-2">
+                  <p class="text-xs text-gray-500">
+                    <i class="fas fa-lightbulb mr-1"></i>
+                    Quanto mais detalhes, melhor será a abertura da solicitação
+                  </p>
+                  <span id="charCount" class="text-xs text-gray-400"
+                    >0 caracteres</span
+                  >
+                </div>
+              </div>
+
+              <!-- Anexo -->
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">
+                  <i class="fas fa-paperclip mr-2 text-blue-600"></i>
+                  Anexo (Opcional)
                 </label>
                 <div
-                  class="space-y-2 p-3 border border-gray-300 rounded-lg bg-gray-50"
+                  class="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-blue-400 transition-colors"
                 >
-                  <div class="flex items-center">
-                    <input
-                      type="checkbox"
-                      name="tipos"
-                      value="SCRIPT_C#"
-                      id="tipo_script_c"
-                      class="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-                    />
-                    <label
-                      for="tipo_script_c"
-                      class="ml-2 text-sm text-gray-700"
-                      >Script C#</label
-                    >
-                  </div>
-                  <div class="flex items-center">
-                    <input
-                      type="checkbox"
-                      name="tipos"
-                      value="SCRIPT_VB"
-                      id="tipo_script_vb"
-                      class="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-                    />
-                    <label
-                      for="tipo_script_vb"
-                      class="ml-2 text-sm text-gray-700"
-                      >Script VB</label
-                    >
-                  </div>
+                  <input
+                    type="file"
+                    name="arquivo"
+                    id="arquivo"
+                    accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.gif"
+                    class="hidden"
+                  />
+                  <label for="arquivo" class="cursor-pointer">
+                    <i
+                      class="fas fa-cloud-upload-alt text-3xl text-gray-400 mb-2"
+                    ></i>
+                    <p class="text-sm text-gray-600">
+                      <span class="text-blue-600 font-medium"
+                        >Clique para selecionar</span
+                      >
+                      ou arraste o arquivo aqui
+                    </p>
+                    <p class="text-xs text-gray-500 mt-1">
+                      PDF, DOC, DOCX, JPG, PNG, GIF (máx. 10MB)
+                    </p>
+                  </label>
                 </div>
-                <p class="text-xs text-gray-500 mt-1">
-                  Selecione pelo menos um tipo de solicitação
-                </p>
-              </div>
-            </div>
-
-            <!-- Dados de Contato -->
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2">
-                  <i class="fas fa-phone mr-2 text-blue-600"></i>
-                  Telefone *
-                </label>
-                <input
-                  type="tel"
-                  name="telefone"
-                  required
-                  placeholder="(61) 99999-9999"
-                  class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-                />
-              </div>
-              <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2">
-                  <i class="fas fa-envelope mr-2 text-blue-600"></i>
-                  E-mail para Contato *
-                </label>
-                <input
-                  type="email"
-                  name="email_contato"
-                  required
-                  placeholder="seu-email@exemplo.com"
-                  value="{{ session.usuario_email }}"
-                  class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-                />
-                <p class="text-xs text-gray-500 mt-1">
-                  E-mail para receber atualizações da solicitação
-                </p>
-              </div>
-            </div>
-
-            <!-- Responsável Técnico (apenas para técnicos e admins) -->
-            {% if session.usuario_tipo in ['TECNICO', 'ADMIN'] %}
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-2">
-                <i class="fas fa-user-cog mr-2 text-blue-600"></i>
-                Responsável pela Solicitação
-              </label>
-              <input
-                type="text"
-                name="responsavel"
-                placeholder="Nome do técnico responsável"
-                class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-              />
-              <p class="text-xs text-gray-500 mt-1">
-                Nome do técnico que irá atender esta solicitação
-              </p>
-            </div>
-            {% endif %}
-
-            <!-- Dados do Usuário Logado -->
-            <div class="bg-blue-50 p-4 rounded-lg border border-blue-200">
-              <h3 class="text-lg font-medium text-gray-900 mb-4">
-                <i class="fas fa-user-check mr-2 text-blue-600"></i>
-                Dados do Solicitante
-              </h3>
-              <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div>
-                  <label class="block text-sm font-medium text-gray-700 mb-1"
-                    >Nome</label
+                <div id="fileInfo" class="mt-2 text-sm text-gray-600 hidden">
+                  <i class="fas fa-file mr-1"></i>
+                  <span id="fileName"></span>
+                  <button
+                    type="button"
+                    id="removeFile"
+                    class="ml-2 text-red-600 hover:text-red-800"
                   >
-                  <p class="text-sm text-gray-900 font-medium">
-                    {{ session.usuario_nome }}
-                  </p>
-                </div>
-                <div>
-                  <label class="block text-sm font-medium text-gray-700 mb-1"
-                    >E-mail</label
-                  >
-                  <p class="text-sm text-gray-900">
-                    {{ session.usuario_email }}
-                  </p>
-                </div>
-                <div>
-                  <label class="block text-sm font-medium text-gray-700 mb-1"
-                    >Tipo</label
-                  >
-                  <span
-                    class="px-2 py-1 text-xs rounded-full {{ 'bg-green-100 text-green-800' if session.usuario_tipo == 'CLIENTE' else 'bg-blue-100 text-blue-800' }}"
-                  >
-                    {{ session.usuario_tipo }}
-                  </span>
+                    <i class="fas fa-times"></i>
+                  </button>
                 </div>
               </div>
-            </div>
 
-            <!-- Descrição -->
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-2">
-                <i class="fas fa-align-left mr-2 text-blue-600"></i>
-                Descrição da Solicitação *
-              </label>
-              <textarea
-                name="descricao"
-                placeholder="Descreva detalhadamente sua solicitação, problema ou dúvida..."
-                required
-                rows="5"
-                class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors resize-none"
-                minlength="10"
-              ></textarea>
-              <div class="flex justify-between items-center mt-2">
-                <p class="text-xs text-gray-500">
-                  <i class="fas fa-lightbulb mr-1"></i>
-                  Quanto mais detalhes, melhor será a abertura da solicitação
-                </p>
-                <span id="charCount" class="text-xs text-gray-400"
-                  >0 caracteres</span
-                >
-              </div>
-            </div>
-
-            <!-- Anexo -->
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-2">
-                <i class="fas fa-paperclip mr-2 text-blue-600"></i>
-                Anexo (Opcional)
-              </label>
-              <div
-                class="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-blue-400 transition-colors"
-              >
-                <input
-                  type="file"
-                  name="arquivo"
-                  id="arquivo"
-                  accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.gif"
-                  class="hidden"
-                />
-                <label for="arquivo" class="cursor-pointer">
-                  <i
-                    class="fas fa-cloud-upload-alt text-3xl text-gray-400 mb-2"
-                  ></i>
-                  <p class="text-sm text-gray-600">
-                    <span class="text-blue-600 font-medium"
-                      >Clique para selecionar</span
-                    >
-                    ou arraste o arquivo aqui
-                  </p>
-                  <p class="text-xs text-gray-500 mt-1">
-                    PDF, DOC, DOCX, JPG, PNG, GIF (máx. 10MB)
-                  </p>
-                </label>
-              </div>
-              <div id="fileInfo" class="mt-2 text-sm text-gray-600 hidden">
-                <i class="fas fa-file mr-1"></i>
-                <span id="fileName"></span>
+              <!-- Submit Button -->
+              <div class="flex justify-end pt-6 border-t border-gray-200">
                 <button
                   type="button"
-                  id="removeFile"
-                  class="ml-2 text-red-600 hover:text-red-800"
+                  onclick="fecharModal()"
+                  class="px-6 py-3 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors mr-3"
                 >
-                  <i class="fas fa-times"></i>
+                  Cancelar
+                </button>
+                <button
+                  type="button"
+                  id="modal-btnRevisar"
+                  class="bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-8 py-3 rounded-lg font-medium hover:from-blue-700 hover:to-indigo-700 focus:ring-4 focus:ring-blue-300 transition-all duration-200 flex items-center"
+                  disabled
+                >
+                  <i class="fas fa-eye mr-2"></i>
+                  Revisar Dados
                 </button>
               </div>
-            </div>
-
-            <!-- Submit Button -->
-            <div class="flex justify-end pt-6 border-t border-gray-200">
-              <button
-                type="button"
-                onclick="fecharModal()"
-                class="px-6 py-3 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors mr-3"
-              >
-                Cancelar
-              </button>
-              <button
-                type="submit"
-                id="submitBtn"
-                class="bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-8 py-3 rounded-lg font-medium hover:from-blue-700 hover:to-indigo-700 focus:ring-4 focus:ring-blue-300 transition-all duration-200 flex items-center"
-                disabled
-              >
-                <i class="fas fa-paper-plane mr-2"></i>
-                Enviar Solicitação
-              </button>
             </div>
           </form>
         </div>
@@ -583,12 +714,49 @@
       // Variáveis globais
       let categorias = [];
       let prioridades = [];
+      let sistemasData = [];
+      let tiposProdutividadeData = [];
 
       // Inicialização
       document.addEventListener("DOMContentLoaded", function () {
         carregarCategorias();
         carregarPrioridades();
+        carregarSistemas();
+        // Não carrega tipos inicialmente - só quando um sistema for selecionado
         inicializarFormularioModal();
+
+        // Adicionar listener para mudança de sistema no modal
+        const selectSistema = document.getElementById("modal-cod_sistema");
+        if (selectSistema) {
+          selectSistema.addEventListener("change", function () {
+            const sistemaId = this.value;
+            const selectTipo = document.getElementById(
+              "modal-cod_tipo_produtividade"
+            );
+
+            if (sistemaId) {
+              // Carrega apenas os tipos vinculados ao sistema selecionado
+              carregarTiposProdutividade(sistemaId);
+            } else {
+              // Se nenhum sistema selecionado, limpa os tipos
+              if (selectTipo) {
+                selectTipo.innerHTML =
+                  '<option value="">Selecione um sistema primeiro...</option>';
+                selectTipo.disabled = true;
+              }
+            }
+          });
+        }
+
+        // Desabilita o select de tipo inicialmente no modal
+        const selectTipo = document.getElementById(
+          "modal-cod_tipo_produtividade"
+        );
+        if (selectTipo) {
+          selectTipo.innerHTML =
+            '<option value="">Selecione um sistema primeiro...</option>';
+          selectTipo.disabled = true;
+        }
       });
 
       async function carregarCategorias() {
@@ -633,14 +801,91 @@
 
       function preencherSelectPrioridades() {
         const select = document.querySelector('select[name="id_prioridade"]');
-        select.innerHTML = '<option value="">Selecione...</option>';
+        if (select) {
+          select.innerHTML = '<option value="">Selecione...</option>';
 
-        prioridades.forEach((prioridade) => {
-          const option = document.createElement("option");
-          option.value = prioridade.ID;
-          option.textContent = prioridade.NOME;
-          select.appendChild(option);
-        });
+          prioridades.forEach((prioridade) => {
+            const option = document.createElement("option");
+            option.value = prioridade.ID;
+            option.textContent = prioridade.NOME;
+            select.appendChild(option);
+          });
+        }
+      }
+
+      async function carregarSistemas() {
+        try {
+          const response = await fetch("/api/v1/sistemas");
+          const data = await response.json();
+
+          if (data.success && data.data) {
+            sistemasData = data.data;
+            const select = document.getElementById("modal-cod_sistema");
+            if (select) {
+              data.data.forEach((sistema) => {
+                const option = document.createElement("option");
+                option.value = sistema.CODSISTEMA;
+                option.textContent = sistema.DESCRICAO;
+                select.appendChild(option);
+              });
+            }
+          }
+        } catch (error) {
+          console.error("Erro ao carregar sistemas:", error);
+        }
+      }
+
+      async function carregarTiposProdutividade(sistemaId) {
+        try {
+          if (!sistemaId) {
+            return;
+          }
+
+          const url = `/api/v1/tipos-produtividade/${sistemaId}`;
+          const response = await fetch(url);
+          const data = await response.json();
+
+          const select = document.getElementById(
+            "modal-cod_tipo_produtividade"
+          );
+          if (select) {
+            if (data.success && data.data && data.data.length > 0) {
+              tiposProdutividadeData = data.data;
+              // Limpa opções existentes
+              select.innerHTML =
+                '<option value="">Selecione o tipo...</option>';
+
+              // Habilita o select
+              select.disabled = false;
+              select.classList.remove("bg-gray-100");
+
+              data.data.forEach((tipo) => {
+                const option = document.createElement("option");
+                option.value = tipo.CODTIPOPRODUTIVIDADE;
+                option.textContent = tipo.DESCRICAO;
+                select.appendChild(option);
+              });
+            } else {
+              // Se não houver tipos vinculados
+              select.innerHTML =
+                '<option value="">Nenhum tipo disponível para este sistema</option>';
+              select.disabled = true;
+              select.classList.add("bg-gray-100");
+              tiposProdutividadeData = [];
+            }
+          }
+        } catch (error) {
+          console.error("Erro ao carregar tipos de produtividade:", error);
+          const select = document.getElementById(
+            "modal-cod_tipo_produtividade"
+          );
+          if (select) {
+            select.innerHTML =
+              '<option value="">Erro ao carregar tipos</option>';
+            select.disabled = true;
+            select.classList.add("bg-gray-100");
+          }
+        }
       }
 
       // Funções do formulário modal
@@ -715,13 +960,17 @@
           field.addEventListener("change", validateModalForm);
         });
 
-        // Validar checkboxes de tipos
-        const tiposCheckboxes = document.querySelectorAll(
-          '#form-nova-solicitacao input[name="tipos"]'
+        // Validar selects de sistema e tipo de produtividade
+        const codSistema = document.getElementById("modal-cod_sistema");
+        const codTipoProdutividade = document.getElementById(
+          "modal-cod_tipo_produtividade"
         );
-        tiposCheckboxes.forEach((checkbox) => {
-          checkbox.addEventListener("change", validateModalForm);
-        });
+        if (codSistema) {
+          codSistema.addEventListener("change", validateModalForm);
+        }
+        if (codTipoProdutividade) {
+          codTipoProdutividade.addEventListener("change", validateModalForm);
+        }
 
         // Inicializar validação
         validateModalForm();
@@ -731,7 +980,7 @@
         const requiredFields = document.querySelectorAll(
           "#form-nova-solicitacao [required]"
         );
-        const submitBtn = document.getElementById("submitBtn");
+        const btnRevisar = document.getElementById("modal-btnRevisar");
         const descricaoTextarea = document.querySelector(
           '#form-nova-solicitacao textarea[name="descricao"]'
         );
@@ -748,11 +997,18 @@
           isValid = false;
         }
 
-        // Validação dos tipos de solicitação (pelo menos um deve estar selecionado)
-        const tiposSelecionados = document.querySelectorAll(
-          '#form-nova-solicitacao input[name="tipos"]:checked'
+        // Validação dos selects (sistema e tipo de produtividade)
+        const codSistema = document.getElementById("modal-cod_sistema");
+        const codTipoProdutividade = document.getElementById(
+          "modal-cod_tipo_produtividade"
         );
-        if (tiposSelecionados.length === 0) {
+        if (
+          !codSistema ||
+          !codSistema.value ||
+          !codTipoProdutividade ||
+          !codTipoProdutividade.value ||
+          codTipoProdutividade.disabled
+        ) {
           isValid = false;
         }
 
@@ -778,23 +1034,237 @@
           }
         }
 
-        if (submitBtn) {
-          submitBtn.disabled = !isValid;
+        if (btnRevisar) {
+          btnRevisar.disabled = !isValid;
 
           if (isValid) {
-            submitBtn.classList.remove("opacity-50", "cursor-not-allowed");
-            submitBtn.classList.add(
+            btnRevisar.classList.remove("opacity-50", "cursor-not-allowed");
+            btnRevisar.classList.add(
               "hover:from-blue-700",
               "hover:to-indigo-700"
             );
           } else {
-            submitBtn.classList.add("opacity-50", "cursor-not-allowed");
-            submitBtn.classList.remove(
+            btnRevisar.classList.add("opacity-50", "cursor-not-allowed");
+            btnRevisar.classList.remove(
               "hover:from-blue-700",
               "hover:to-indigo-700"
             );
           }
         }
+
+        return isValid;
+      }
+
+      // Função para preencher dados de revisão
+      function preencherModalRevisao() {
+        // Sistema
+        const codSistema = document.getElementById("modal-cod_sistema").value;
+        const sistema = sistemasData.find((s) => s.CODSISTEMA == codSistema);
+        document.getElementById("modal-revisao-sistema").textContent = sistema
+          ? sistema.DESCRICAO
+          : "Não selecionado";
+
+        // Tipo de Produtividade
+        const codTipo = document.getElementById(
+          "modal-cod_tipo_produtividade"
+        ).value;
+        const tipo = tiposProdutividadeData.find(
+          (t) => t.CODTIPOPRODUTIVIDADE == codTipo
+        );
+        document.getElementById("modal-revisao-tipo").textContent = tipo
+          ? tipo.DESCRICAO
+          : "Não selecionado";
+
+        // Telefone
+        const telefone = document.querySelector(
+          '#form-nova-solicitacao input[name="telefone"]'
+        ).value;
+        document.getElementById("modal-revisao-telefone").textContent =
+          telefone || "Não informado";
+
+        // Email
+        const email = document.querySelector(
+          '#form-nova-solicitacao input[name="email_contato"]'
+        ).value;
+        document.getElementById("modal-revisao-email").textContent =
+          email || "Não informado";
+
+        // Responsável Técnico (se existir)
+        const responsavel = document.querySelector(
+          '#form-nova-solicitacao input[name="responsavel"]'
+        );
+        if (responsavel && responsavel.value) {
+          document.getElementById("modal-revisao-responsavel").textContent =
+            responsavel.value;
+          document
+            .getElementById("modal-revisao-responsavel-container")
+            .classList.remove("hidden");
+        } else {
+          document
+            .getElementById("modal-revisao-responsavel-container")
+            .classList.add("hidden");
+        }
+
+        // Descrição
+        const descricao = document.querySelector(
+          '#form-nova-solicitacao textarea[name="descricao"]'
+        ).value;
+        document.getElementById("modal-revisao-descricao").textContent =
+          descricao || "Não informado";
+
+        // Anexo
+        const arquivoInput = document.getElementById("arquivo");
+        if (arquivoInput && arquivoInput.files.length > 0) {
+          document.getElementById("modal-revisao-anexo-nome").textContent =
+            arquivoInput.files[0].name;
+          document
+            .getElementById("modal-revisao-anexo-container")
+            .classList.remove("hidden");
+        } else {
+          document
+            .getElementById("modal-revisao-anexo-container")
+            .classList.add("hidden");
+        }
+      }
+
+      // Função para mostrar revisão
+      function mostrarModalRevisao() {
+        if (!validateModalForm()) {
+          alert(
+            "Por favor, preencha todos os campos obrigatórios corretamente."
+          );
+          return;
+        }
+
+        preencherModalRevisao();
+
+        // Esconde formulário e mostra revisão
+        document.getElementById("modal-formSection").classList.add("hidden");
+        document
+          .getElementById("modal-revisaoSection")
+          .classList.remove("hidden");
+
+        // Atualiza indicador de progresso
+        document
+          .getElementById("modal-step1")
+          .classList.remove("bg-blue-600", "text-white");
+        document
+          .getElementById("modal-step1")
+          .classList.add("bg-green-500", "text-white");
+        document
+          .getElementById("modal-step1-line")
+          .classList.remove("bg-blue-600");
+        document
+          .getElementById("modal-step1-line")
+          .classList.add("bg-green-500");
+        document
+          .getElementById("modal-step1-label")
+          .classList.remove("text-blue-600", "font-medium");
+        document
+          .getElementById("modal-step1-label")
+          .classList.add("text-green-600");
+
+        document
+          .getElementById("modal-step2")
+          .classList.remove("bg-gray-300", "text-gray-500");
+        document
+          .getElementById("modal-step2")
+          .classList.add("bg-blue-600", "text-white");
+        document
+          .getElementById("modal-step2-line")
+          .classList.remove("bg-gray-300");
+        document
+          .getElementById("modal-step2-line")
+          .classList.add("bg-blue-600");
+        document
+          .getElementById("modal-step2-label")
+          .classList.remove("text-gray-500");
+        document
+          .getElementById("modal-step2-label")
+          .classList.add("text-blue-600", "font-medium");
+      }
+
+      // Função para voltar ao formulário
+      function voltarAoModalFormulario() {
+        document.getElementById("modal-formSection").classList.remove("hidden");
+        document.getElementById("modal-revisaoSection").classList.add("hidden");
+
+        // Atualiza indicador de progresso
+        document.getElementById("modal-step1").classList.remove("bg-green-500");
+        document.getElementById("modal-step1").classList.add("bg-blue-600");
+        document
+          .getElementById("modal-step1-line")
+          .classList.remove("bg-green-500");
+        document
+          .getElementById("modal-step1-line")
+          .classList.add("bg-blue-600");
+        document
+          .getElementById("modal-step1-label")
+          .classList.remove("text-green-600");
+        document
+          .getElementById("modal-step1-label")
+          .classList.add("text-blue-600", "font-medium");
+
+        document
+          .getElementById("modal-step2")
+          .classList.remove("bg-blue-600", "text-white");
+        document
+          .getElementById("modal-step2")
+          .classList.add("bg-gray-300", "text-gray-500");
+        document
+          .getElementById("modal-step2-line")
+          .classList.remove("bg-blue-600");
+        document
+          .getElementById("modal-step2-line")
+          .classList.add("bg-gray-300");
+        document
+          .getElementById("modal-step2-label")
+          .classList.remove("text-blue-600", "font-medium");
+        document
+          .getElementById("modal-step2-label")
+          .classList.add("text-gray-500");
+      }
+
+      // Função para confirmar e enviar
+      function confirmarModalEnviar() {
+        const loadingOverlay = document.getElementById("loadingOverlay");
+        loadingOverlay.classList.remove("hidden");
+
+        // Atualiza indicador de progresso para confirmação
+        document
+          .getElementById("modal-step2")
+          .classList.remove("bg-blue-600", "text-white");
+        document
+          .getElementById("modal-step2")
+          .classList.add("bg-green-500", "text-white");
+        document
+          .getElementById("modal-step2-line")
+          .classList.remove("bg-blue-600");
+        document
+          .getElementById("modal-step2-line")
+          .classList.add("bg-green-500");
+        document
+          .getElementById("modal-step2-label")
+          .classList.remove("text-blue-600", "font-medium");
+        document
+          .getElementById("modal-step2-label")
+          .classList.add("text-green-600");
+
+        document
+          .getElementById("modal-step3")
+          .classList.remove("bg-gray-300", "text-gray-500");
+        document
+          .getElementById("modal-step3")
+          .classList.add("bg-blue-600", "text-white");
+        document
+          .getElementById("modal-step3-label")
+          .classList.remove("text-gray-500");
+        document
+          .getElementById("modal-step3-label")
+          .classList.add("text-blue-600", "font-medium");
+
+        // Envia o formulário
+        document.getElementById("form-nova-solicitacao").submit();
       }
 
       // Funções de modal
@@ -810,6 +1280,60 @@
           .classList.add("hidden");
         document.getElementById("form-nova-solicitacao").reset();
 
+        // Voltar para a seção do formulário
+        document.getElementById("modal-formSection").classList.remove("hidden");
+        document.getElementById("modal-revisaoSection").classList.add("hidden");
+
+        // Resetar indicador de progresso
+        document.getElementById("modal-step1").classList.remove("bg-green-500");
+        document
+          .getElementById("modal-step1")
+          .classList.add("bg-blue-600", "text-white");
+        document
+          .getElementById("modal-step1-line")
+          .classList.remove("bg-green-500");
+        document
+          .getElementById("modal-step1-line")
+          .classList.add("bg-blue-600");
+        document
+          .getElementById("modal-step1-label")
+          .classList.remove("text-green-600");
+        document
+          .getElementById("modal-step1-label")
+          .classList.add("text-blue-600", "font-medium");
+
+        document
+          .getElementById("modal-step2")
+          .classList.remove("bg-blue-600", "text-white", "bg-green-500");
+        document
+          .getElementById("modal-step2")
+          .classList.add("bg-gray-300", "text-gray-500");
+        document
+          .getElementById("modal-step2-line")
+          .classList.remove("bg-blue-600", "bg-green-500");
+        document
+          .getElementById("modal-step2-line")
+          .classList.add("bg-gray-300");
+        document
+          .getElementById("modal-step2-label")
+          .classList.remove("text-blue-600", "font-medium", "text-green-600");
+        document
+          .getElementById("modal-step2-label")
+          .classList.add("text-gray-500");
+
+        document
+          .getElementById("modal-step3")
+          .classList.remove("bg-blue-600", "text-white");
+        document
+          .getElementById("modal-step3")
+          .classList.add("bg-gray-300", "text-gray-500");
+        document
+          .getElementById("modal-step3-label")
+          .classList.remove("text-blue-600", "font-medium");
+        document
+          .getElementById("modal-step3-label")
+          .classList.add("text-gray-500");
+
         // Limpar arquivo selecionado
         const fileInfo = document.getElementById("fileInfo");
         if (fileInfo) {
@@ -824,11 +1348,38 @@
           charCount.classList.add("text-gray-400");
         }
 
+        // Resetar select de tipo de produtividade
+        const selectTipo = document.getElementById(
+          "modal-cod_tipo_produtividade"
+        );
+        if (selectTipo) {
+          selectTipo.innerHTML =
+            '<option value="">Selecione um sistema primeiro...</option>';
+          selectTipo.disabled = true;
+          selectTipo.classList.add("bg-gray-100");
+        }
+
         // Resetar validação
         validateModalForm();
       }
 
       // Event listeners
+      const btnRevisar = document.getElementById("modal-btnRevisar");
+      const btnVoltarEditar = document.getElementById("modal-btnVoltarEditar");
+      const btnConfirmarEnviar = document.getElementById(
+        "modal-btnConfirmarEnviar"
+      );
+
+      if (btnRevisar) {
+        btnRevisar.addEventListener("click", mostrarModalRevisao);
+      }
+      if (btnVoltarEditar) {
+        btnVoltarEditar.addEventListener("click", voltarAoModalFormulario);
+      }
+      if (btnConfirmarEnviar) {
+        btnConfirmarEnviar.addEventListener("click", confirmarModalEnviar);
+      }
+
       document
         .getElementById("form-nova-solicitacao")
         .addEventListener("submit", async function (e) {
@@ -847,7 +1398,10 @@
 
             if (response.ok) {
               const result = await response.text();
-              if (result.includes("Solicitação Enviada com Sucesso")) {
+              if (
+                result.includes("Solicitação Enviada com Sucesso") ||
+                result.includes("confirmacao")
+              ) {
                 alert("Solicitação criada com sucesso!");
                 fecharModal();
                 window.location.reload(); // Recarrega a página para mostrar a nova solicitação

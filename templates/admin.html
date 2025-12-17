@@ -9,6 +9,7 @@
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
     />
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   </head>
   <body class="bg-gray-50">
     <!-- Header -->
@@ -148,6 +149,42 @@
             </div>
           </div>
         </div>
+
+        <!-- Sistemas -->
+        <div
+          class="bg-white rounded-lg shadow p-6 hover:shadow-lg transition-shadow cursor-pointer"
+          onclick="abrirModal('sistemas')"
+        >
+          <div class="flex items-center">
+            <div class="p-3 rounded-full bg-indigo-100 text-indigo-600">
+              <i class="fas fa-desktop text-xl"></i>
+            </div>
+            <div class="ml-4">
+              <p class="text-sm font-medium text-gray-600">Sistemas</p>
+              <p class="text-2xl font-bold text-gray-900" id="total-sistemas">
+                0
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tipos de Produtividade -->
+        <div
+          class="bg-white rounded-lg shadow p-6 hover:shadow-lg transition-shadow cursor-pointer"
+          onclick="abrirModal('tipos-produtividade')"
+        >
+          <div class="flex items-center">
+            <div class="p-3 rounded-full bg-teal-100 text-teal-600">
+              <i class="fas fa-tasks text-xl"></i>
+            </div>
+            <div class="ml-4">
+              <p class="text-sm font-medium text-gray-600">Tipos de Produtividade</p>
+              <p class="text-2xl font-bold text-gray-900" id="total-tipos-produtividade">
+                0
+              </p>
+            </div>
+          </div>
+        </div>
       </div>
 
       <!-- Quick Actions -->
@@ -187,6 +224,45 @@
               <p class="font-medium text-gray-900">Novo Status</p>
               <p class="text-sm text-gray-600">
                 Adicionar status de solicitação
+              </p>
+            </div>
+          </button>
+
+          <button
+            onclick="abrirModal('novo-sistema')"
+            class="flex items-center p-4 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+          >
+            <i class="fas fa-plus text-indigo-600 mr-3"></i>
+            <div class="text-left">
+              <p class="font-medium text-gray-900">Novo Sistema</p>
+              <p class="text-sm text-gray-600">
+                Cadastrar novo sistema
+              </p>
+            </div>
+          </button>
+
+          <button
+            onclick="abrirModal('novo-tipo-produtividade')"
+            class="flex items-center p-4 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+          >
+            <i class="fas fa-plus text-teal-600 mr-3"></i>
+            <div class="text-left">
+              <p class="font-medium text-gray-900">Novo Tipo de Produtividade</p>
+              <p class="text-sm text-gray-600">
+                Criar tipo de produtividade
+              </p>
+            </div>
+          </button>
+
+          <button
+            onclick="abrirModal('vincular-sistema-tipo')"
+            class="flex items-center p-4 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+          >
+            <i class="fas fa-link text-blue-600 mr-3"></i>
+            <div class="text-left">
+              <p class="font-medium text-gray-900">Vincular Sistema e Tipo</p>
+              <p class="text-sm text-gray-600">
+                Associar sistema com tipo de produtividade
               </p>
             </div>
           </button>
@@ -276,6 +352,10 @@
               data.data.status || 0;
             document.getElementById("total-templates").textContent =
               data.data.templates || 0;
+            document.getElementById("total-sistemas").textContent =
+              data.data.sistemas || 0;
+            document.getElementById("total-tipos-produtividade").textContent =
+              data.data.tipos_produtividade || 0;
           }
         } catch (error) {
           console.error("Erro ao carregar estatísticas:", error);
@@ -309,6 +389,21 @@
             break;
           case "novo-status":
             carregarModalNovoStatus(modalContent);
+            break;
+          case "sistemas":
+            carregarModalSistemas(modalContent);
+            break;
+          case "tipos-produtividade":
+            carregarModalTiposProdutividade(modalContent);
+            break;
+          case "novo-sistema":
+            carregarModalNovoSistema(modalContent);
+            break;
+          case "novo-tipo-produtividade":
+            carregarModalNovoTipoProdutividade(modalContent);
+            break;
+          case "vincular-sistema-tipo":
+            carregarModalVincularSistemaTipo(modalContent);
             break;
         }
 
@@ -737,7 +832,12 @@
       async function editarUsuario(id) {
         console.log("Editando usuário:", id);
         // Implementar edição de usuário
-        alert("Funcionalidade de edição será implementada em breve");
+        Swal.fire({
+          icon: 'info',
+          title: 'Em breve',
+          text: 'Funcionalidade de edição será implementada em breve',
+          confirmButtonColor: '#3B82F6'
+        });
       }
 
       async function toggleUsuario(id) {
@@ -754,55 +854,129 @@
           if (data.success) {
             // Recarrega o modal de usuários
             abrirModal("usuarios");
+            Swal.fire({
+              icon: 'success',
+              title: 'Sucesso!',
+              text: 'Status do usuário alterado com sucesso',
+              timer: 2000,
+              showConfirmButton: false
+            });
           } else {
-            alert("Erro: " + data.error);
+            Swal.fire({
+              icon: 'error',
+              title: 'Erro',
+              text: data.error || 'Erro ao alterar status do usuário',
+              confirmButtonColor: '#EF4444'
+            });
           }
         } catch (error) {
           console.error("Erro ao toggle usuário:", error);
-          alert("Erro ao alterar status do usuário");
+          Swal.fire({
+            icon: 'error',
+            title: 'Erro',
+            text: 'Erro ao alterar status do usuário',
+            confirmButtonColor: '#EF4444'
+          });
         }
       }
 
       // Funções para gerenciar categorias
       async function editarCategoria(id) {
         console.log("Editando categoria:", id);
-        alert("Funcionalidade de edição será implementada em breve");
+        Swal.fire({
+          icon: 'info',
+          title: 'Em breve',
+          text: 'Funcionalidade de edição será implementada em breve',
+          confirmButtonColor: '#3B82F6'
+        });
       }
 
       async function excluirCategoria(id) {
-        if (confirm("Tem certeza que deseja excluir esta categoria?")) {
+        const result = await Swal.fire({
+          icon: 'warning',
+          title: 'Excluir Categoria?',
+          text: 'Tem certeza que deseja excluir esta categoria? Esta ação não pode ser desfeita.',
+          showCancelButton: true,
+          confirmButtonColor: '#EF4444',
+          cancelButtonColor: '#6B7280',
+          confirmButtonText: 'Sim, excluir',
+          cancelButtonText: 'Cancelar'
+        });
+
+        if (result.isConfirmed) {
           console.log("Excluindo categoria:", id);
-          alert("Funcionalidade de exclusão será implementada em breve");
+          Swal.fire({
+            icon: 'info',
+            title: 'Em breve',
+            text: 'Funcionalidade de exclusão será implementada em breve',
+            confirmButtonColor: '#3B82F6'
+          });
         }
       }
 
       // Funções para gerenciar status
       async function editarStatus(id) {
         console.log("Editando status:", id);
-        alert("Funcionalidade de edição será implementada em breve");
+        Swal.fire({
+          icon: 'info',
+          title: 'Em breve',
+          text: 'Funcionalidade de edição será implementada em breve',
+          confirmButtonColor: '#3B82F6'
+        });
       }
 
       async function excluirStatus(id) {
-        if (confirm("Tem certeza que deseja excluir este status?")) {
+        const result = await Swal.fire({
+          icon: 'warning',
+          title: 'Excluir Status?',
+          text: 'Tem certeza que deseja excluir este status? Esta ação não pode ser desfeita.',
+          showCancelButton: true,
+          confirmButtonColor: '#EF4444',
+          cancelButtonColor: '#6B7280',
+          confirmButtonText: 'Sim, excluir',
+          cancelButtonText: 'Cancelar'
+        });
+
+        if (result.isConfirmed) {
           console.log("Excluindo status:", id);
-          alert("Funcionalidade de exclusão será implementada em breve");
+          Swal.fire({
+            icon: 'info',
+            title: 'Em breve',
+            text: 'Funcionalidade de exclusão será implementada em breve',
+            confirmButtonColor: '#3B82F6'
+          });
         }
       }
 
       // Funções para gerenciar templates
       async function editarTemplate(id) {
         console.log("Editando template:", id);
-        alert("Funcionalidade de edição será implementada em breve");
+        Swal.fire({
+          icon: 'info',
+          title: 'Em breve',
+          text: 'Funcionalidade de edição será implementada em breve',
+          confirmButtonColor: '#3B82F6'
+        });
       }
 
       async function toggleTemplate(id) {
         console.log("Toggle template:", id);
-        alert("Funcionalidade de toggle será implementada em breve");
+        Swal.fire({
+          icon: 'info',
+          title: 'Em breve',
+          text: 'Funcionalidade de toggle será implementada em breve',
+          confirmButtonColor: '#3B82F6'
+        });
       }
 
       async function novoTemplate() {
         console.log("Novo template");
-        alert("Funcionalidade de novo template será implementada em breve");
+        Swal.fire({
+          icon: 'info',
+          title: 'Em breve',
+          text: 'Funcionalidade de novo template será implementada em breve',
+          confirmButtonColor: '#3B82F6'
+        });
       }
 
       // Funções para modais de criação
@@ -882,16 +1056,32 @@
               const result = await response.json();
 
               if (result.success) {
-                alert("Usuário criado com sucesso!");
-                fecharModal();
-                // Recarrega estatísticas
-                carregarEstatisticas();
+                Swal.fire({
+                  icon: 'success',
+                  title: 'Sucesso!',
+                  text: 'Usuário criado com sucesso!',
+                  timer: 2000,
+                  showConfirmButton: false
+                }).then(() => {
+                  fecharModal();
+                  carregarEstatisticas();
+                });
               } else {
-                alert("Erro: " + result.error);
+                Swal.fire({
+                  icon: 'error',
+                  title: 'Erro',
+                  text: result.error || 'Erro ao criar usuário',
+                  confirmButtonColor: '#EF4444'
+                });
               }
             } catch (error) {
               console.error("Erro ao criar usuário:", error);
-              alert("Erro ao criar usuário");
+              Swal.fire({
+                icon: 'error',
+                title: 'Erro',
+                text: 'Erro ao criar usuário',
+                confirmButtonColor: '#EF4444'
+              });
             }
           });
       }
@@ -926,6 +1116,849 @@
                     <p class="text-gray-600">Funcionalidade será implementada em breve.</p>
                 </div>
             `;
+      }
+
+      // Carregar modal de sistemas
+      async function carregarModalSistemas(container) {
+        try {
+          const response = await fetch("/api/v1/sistemas");
+          const data = await response.json();
+
+          const sistemas = data.success && data.data ? data.data : [];
+
+          container.innerHTML = `
+                    <div class="px-6 py-4 border-b border-gray-200">
+                        <div class="flex justify-between items-center">
+                            <h3 class="text-lg font-semibold text-gray-900">Gerenciar Sistemas</h3>
+                            <button onclick="fecharModal()" class="text-gray-400 hover:text-gray-600">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="p-6">
+                        <div class="flex justify-between items-center mb-4">
+                            <h4 class="text-md font-medium text-gray-900">Sistemas Cadastrados</h4>
+                            <button onclick="abrirModal('novo-sistema')" class="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700">
+                                <i class="fas fa-plus mr-2"></i>Novo Sistema
+                            </button>
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table class="min-w-full divide-y divide-gray-200">
+                                <thead class="bg-gray-50">
+                                    <tr>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">ID</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Descrição</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Ações</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="bg-white divide-y divide-gray-200">
+                                    ${
+                                      sistemas.length > 0
+                                        ? sistemas
+                                            .map(
+                                              (sistema) => `
+                                        <tr>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${
+                                              sistema.CODSISTEMA
+                                            }</td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${
+                                              sistema.DESCRICAO || "Sem descrição"
+                                            }</td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                                <button onclick="editarSistema(${
+                                                  sistema.CODSISTEMA
+                                                }, '${(sistema.DESCRICAO || "").replace(/'/g, "\\'")}')" class="text-blue-600 hover:text-blue-900 mr-3">
+                                                    <i class="fas fa-edit"></i>
+                                                </button>
+                                                <button onclick="excluirSistema(${
+                                                  sistema.CODSISTEMA
+                                                })" class="text-red-600 hover:text-red-900">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    `
+                                            )
+                                            .join("")
+                                        : '<tr><td colspan="3" class="px-6 py-4 text-center text-gray-500">Nenhum sistema encontrado</td></tr>'
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                `;
+        } catch (error) {
+          container.innerHTML = `
+                    <div class="px-6 py-4 border-b border-gray-200">
+                        <h3 class="text-lg font-semibold text-gray-900">Erro</h3>
+                    </div>
+                    <div class="p-6">
+                        <p class="text-red-600">Erro ao carregar sistemas: ${error.message}</p>
+                    </div>
+                `;
+        }
+      }
+
+      // Carregar modal de tipos de produtividade
+      async function carregarModalTiposProdutividade(container) {
+        try {
+          const response = await fetch("/api/v1/tipos-produtividade");
+          const data = await response.json();
+
+          const tipos = data.success && data.data ? data.data : [];
+
+          container.innerHTML = `
+                    <div class="px-6 py-4 border-b border-gray-200">
+                        <div class="flex justify-between items-center">
+                            <h3 class="text-lg font-semibold text-gray-900">Gerenciar Tipos de Produtividade</h3>
+                            <button onclick="fecharModal()" class="text-gray-400 hover:text-gray-600">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="p-6">
+                        <div class="flex justify-between items-center mb-4">
+                            <h4 class="text-md font-medium text-gray-900">Tipos Cadastrados</h4>
+                            <button onclick="abrirModal('novo-tipo-produtividade')" class="bg-teal-600 text-white px-4 py-2 rounded-lg hover:bg-teal-700">
+                                <i class="fas fa-plus mr-2"></i>Novo Tipo
+                            </button>
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table class="min-w-full divide-y divide-gray-200">
+                                <thead class="bg-gray-50">
+                                    <tr>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">ID</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Descrição</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Pontos</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Tipo</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Ações</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="bg-white divide-y divide-gray-200">
+                                    ${
+                                      tipos.length > 0
+                                        ? tipos
+                                            .map(
+                                              (tipo) => `
+                                        <tr>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${
+                                              tipo.CODTIPOPRODUTIVIDADE
+                                            }</td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${
+                                              tipo.DESCRICAO || "Sem descrição"
+                                            }</td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${
+                                              tipo.PONTOS || 0
+                                            }</td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${
+                                              tipo.TIPO || 0
+                                            }</td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                                <button onclick="editarTipoProdutividade(${
+                                                  tipo.CODTIPOPRODUTIVIDADE
+                                                }, '${(tipo.DESCRICAO || "").replace(/'/g, "\\'")}', ${
+                                                tipo.PONTOS || 0
+                                              }, ${tipo.TIPO || 0})" class="text-blue-600 hover:text-blue-900 mr-3">
+                                                    <i class="fas fa-edit"></i>
+                                                </button>
+                                                <button onclick="excluirTipoProdutividade(${
+                                                  tipo.CODTIPOPRODUTIVIDADE
+                                                })" class="text-red-600 hover:text-red-900">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    `
+                                            )
+                                            .join("")
+                                        : '<tr><td colspan="5" class="px-6 py-4 text-center text-gray-500">Nenhum tipo encontrado</td></tr>'
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                `;
+        } catch (error) {
+          container.innerHTML = `
+                    <div class="px-6 py-4 border-b border-gray-200">
+                        <h3 class="text-lg font-semibold text-gray-900">Erro</h3>
+                    </div>
+                    <div class="p-6">
+                        <p class="text-red-600">Erro ao carregar tipos de produtividade: ${error.message}</p>
+                    </div>
+                `;
+        }
+      }
+
+      // Carregar modal de novo sistema
+      function carregarModalNovoSistema(container) {
+        container.innerHTML = `
+                <div class="px-6 py-4 border-b border-gray-200">
+                    <div class="flex justify-between items-center">
+                        <h3 class="text-lg font-semibold text-gray-900">Novo Sistema</h3>
+                        <button onclick="fecharModal()" class="text-gray-400 hover:text-gray-600">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="p-6">
+                    <form id="formNovoSistema" class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Descrição *</label>
+                            <input type="text" name="DESCRICAO" required class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" placeholder="Ex: Laudos Flex">
+                        </div>
+                        <div class="flex justify-end space-x-3 pt-4">
+                            <button type="button" onclick="fecharModal()" class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50">
+                                Cancelar
+                            </button>
+                            <button type="submit" class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700">
+                                Criar Sistema
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            `;
+
+        document
+          .getElementById("formNovoSistema")
+          .addEventListener("submit", async function (e) {
+            e.preventDefault();
+
+            const formData = new FormData(this);
+            const dados = {
+              DESCRICAO: formData.get("DESCRICAO"),
+            };
+
+            try {
+              const response = await fetch("/api/v1/sistemas", {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                },
+                body: JSON.stringify(dados),
+              });
+
+              const result = await response.json();
+
+              if (result.success) {
+                Swal.fire({
+                  icon: 'success',
+                  title: 'Sucesso!',
+                  text: 'Sistema criado com sucesso!',
+                  timer: 2000,
+                  showConfirmButton: false
+                }).then(() => {
+                  fecharModal();
+                  carregarEstatisticas();
+                });
+              } else {
+                Swal.fire({
+                  icon: 'error',
+                  title: 'Erro',
+                  text: result.error || 'Erro ao criar sistema',
+                  confirmButtonColor: '#EF4444'
+                });
+              }
+            } catch (error) {
+              console.error("Erro ao criar sistema:", error);
+              Swal.fire({
+                icon: 'error',
+                title: 'Erro',
+                text: 'Erro ao criar sistema',
+                confirmButtonColor: '#EF4444'
+              });
+            }
+          });
+      }
+
+      // Carregar modal de novo tipo de produtividade
+      function carregarModalNovoTipoProdutividade(container) {
+        container.innerHTML = `
+                <div class="px-6 py-4 border-b border-gray-200">
+                    <div class="flex justify-between items-center">
+                        <h3 class="text-lg font-semibold text-gray-900">Novo Tipo de Produtividade</h3>
+                        <button onclick="fecharModal()" class="text-gray-400 hover:text-gray-600">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="p-6">
+                    <form id="formNovoTipoProdutividade" class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Descrição *</label>
+                            <input type="text" name="DESCRICAO" required class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500" placeholder="Ex: Script C#">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Pontos</label>
+                            <input type="number" name="PONTOS" value="0" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Tipo *</label>
+                            <input type="number" name="TIPO" required value="0" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500">
+                        </div>
+                        <div class="flex justify-end space-x-3 pt-4">
+                            <button type="button" onclick="fecharModal()" class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50">
+                                Cancelar
+                            </button>
+                            <button type="submit" class="px-4 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700">
+                                Criar Tipo
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            `;
+
+        document
+          .getElementById("formNovoTipoProdutividade")
+          .addEventListener("submit", async function (e) {
+            e.preventDefault();
+
+            const formData = new FormData(this);
+            const dados = {
+              DESCRICAO: formData.get("DESCRICAO"),
+              PONTOS: parseInt(formData.get("PONTOS")) || 0,
+              TIPO: parseInt(formData.get("TIPO")) || 0,
+            };
+
+            try {
+              const response = await fetch("/api/v1/tipos-produtividade", {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                },
+                body: JSON.stringify(dados),
+              });
+
+              const result = await response.json();
+
+              if (result.success) {
+                Swal.fire({
+                  icon: 'success',
+                  title: 'Sucesso!',
+                  text: 'Tipo de produtividade criado com sucesso!',
+                  timer: 2000,
+                  showConfirmButton: false
+                }).then(() => {
+                  fecharModal();
+                  carregarEstatisticas();
+                });
+              } else {
+                Swal.fire({
+                  icon: 'error',
+                  title: 'Erro',
+                  text: result.error || 'Erro ao criar tipo de produtividade',
+                  confirmButtonColor: '#EF4444'
+                });
+              }
+            } catch (error) {
+              console.error("Erro ao criar tipo de produtividade:", error);
+              Swal.fire({
+                icon: 'error',
+                title: 'Erro',
+                text: 'Erro ao criar tipo de produtividade',
+                confirmButtonColor: '#EF4444'
+              });
+            }
+          });
+      }
+
+      // Carregar modal de vincular sistema e tipo
+      async function carregarModalVincularSistemaTipo(container) {
+        try {
+          const [sistemasRes, tiposRes, vinculosRes] = await Promise.all([
+            fetch("/api/v1/sistemas"),
+            fetch("/api/v1/tipos-produtividade"),
+            fetch("/api/v1/sistema-tipo-produtividade"),
+          ]);
+
+          const sistemasData = await sistemasRes.json();
+          const tiposData = await tiposRes.json();
+          const vinculosData = await vinculosRes.json();
+
+          const sistemas = sistemasData.success ? sistemasData.data : [];
+          const tipos = tiposData.success ? tiposData.data : [];
+          const vinculos = vinculosData.success ? vinculosData.data : [];
+
+          container.innerHTML = `
+                    <div class="px-6 py-4 border-b border-gray-200">
+                        <div class="flex justify-between items-center">
+                            <h3 class="text-lg font-semibold text-gray-900">Vincular Sistema e Tipos de Produtividade</h3>
+                            <button onclick="fecharModal()" class="text-gray-400 hover:text-gray-600">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="p-6">
+                        <div class="mb-6">
+                            <h4 class="text-md font-medium text-gray-900 mb-4">Criar Novos Vínculos</h4>
+                            <form id="formNovoVinculo" class="space-y-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Sistema *</label>
+                                    <select name="CODSISTEMA" id="selectSistemaVinculo" required class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                                        <option value="">Selecione o sistema...</option>
+                                        ${sistemas
+                                          .map(
+                                            (s) =>
+                                              `<option value="${s.CODSISTEMA}">${s.DESCRICAO}</option>`
+                                          )
+                                          .join("")}
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Tipos de Produtividade * <span class="text-gray-500 font-normal">(selecione múltiplos)</span></label>
+                                    <div id="tiposCheckboxContainer" class="border border-gray-300 rounded-lg p-4 max-h-60 overflow-y-auto bg-gray-50">
+                                        <p class="text-gray-500 text-sm">Selecione um sistema primeiro...</p>
+                                    </div>
+                                    <p class="text-xs text-gray-500 mt-1">Marque os tipos que deseja vincular ao sistema selecionado</p>
+                                </div>
+                                <div class="flex justify-between items-center">
+                                    <span id="tiposSelecionados" class="text-sm text-gray-600">0 tipos selecionados</span>
+                                    <button type="submit" id="btnVincular" disabled class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed">
+                                        <i class="fas fa-link mr-2"></i>Vincular Selecionados
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                        <div>
+                            <h4 class="text-md font-medium text-gray-900 mb-4">Vínculos Existentes</h4>
+                            <div class="overflow-x-auto">
+                                <table class="min-w-full divide-y divide-gray-200">
+                                    <thead class="bg-gray-50">
+                                        <tr>
+                                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Sistema</th>
+                                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Tipo de Produtividade</th>
+                                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
+                                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Ações</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="bg-white divide-y divide-gray-200">
+                                        ${
+                                          vinculos.length > 0
+                                            ? vinculos
+                                                .map(
+                                                  (v) => `
+                                            <tr>
+                                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${
+                                                  v.DESCRICAO_SISTEMA || "N/A"
+                                                }</td>
+                                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${
+                                                  v.DESCRICAO_TIPO || "N/A"
+                                                }</td>
+                                                <td class="px-6 py-4 whitespace-nowrap">
+                                                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                                                      v.ATIVO
+                                                        ? "bg-green-100 text-green-800"
+                                                        : "bg-red-100 text-red-800"
+                                                    }">
+                                                        ${v.ATIVO ? "Ativo" : "Inativo"}
+                                                    </span>
+                                                </td>
+                                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                                    <button onclick="excluirVinculo(${
+                                                      v.ID
+                                                    })" class="text-red-600 hover:text-red-900">
+                                                        <i class="fas fa-trash"></i>
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                        `
+                                                )
+                                                .join("")
+                                            : '<tr><td colspan="4" class="px-6 py-4 text-center text-gray-500">Nenhum vínculo encontrado</td></tr>'
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                `;
+
+          // Armazenar tipos e vínculos para uso posterior
+          window.tiposDisponiveis = tipos;
+          window.vinculosExistentes = vinculos;
+
+          // Listener para mudança de sistema
+          document.getElementById("selectSistemaVinculo").addEventListener("change", function() {
+            const sistemaId = parseInt(this.value);
+            const container = document.getElementById("tiposCheckboxContainer");
+            const btnVincular = document.getElementById("btnVincular");
+            const tiposSelecionadosSpan = document.getElementById("tiposSelecionados");
+            
+            if (!sistemaId) {
+              container.innerHTML = '<p class="text-gray-500 text-sm">Selecione um sistema primeiro...</p>';
+              btnVincular.disabled = true;
+              tiposSelecionadosSpan.textContent = "0 tipos selecionados";
+              return;
+            }
+            
+            // Filtrar tipos já vinculados a este sistema
+            const tiposJaVinculados = window.vinculosExistentes
+              .filter(v => v.CODSISTEMA === sistemaId)
+              .map(v => v.CODTIPOPRODUTIVIDADE);
+            
+            // Tipos disponíveis para vincular (não vinculados ainda)
+            const tiposParaVincular = window.tiposDisponiveis.filter(
+              t => !tiposJaVinculados.includes(t.CODTIPOPRODUTIVIDADE)
+            );
+            
+            if (tiposParaVincular.length === 0) {
+              container.innerHTML = '<p class="text-gray-500 text-sm">Todos os tipos já estão vinculados a este sistema.</p>';
+              btnVincular.disabled = true;
+              return;
+            }
+            
+            container.innerHTML = `
+              <div class="mb-2 pb-2 border-b border-gray-200">
+                <label class="flex items-center cursor-pointer">
+                  <input type="checkbox" id="selectAllTipos" class="mr-2 h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500">
+                  <span class="text-sm font-medium text-gray-700">Selecionar Todos</span>
+                </label>
+              </div>
+              <div class="space-y-2">
+                ${tiposParaVincular.map(t => `
+                  <label class="flex items-center cursor-pointer hover:bg-gray-100 p-1 rounded">
+                    <input type="checkbox" name="tipos[]" value="${t.CODTIPOPRODUTIVIDADE}" class="tipo-checkbox mr-2 h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500">
+                    <span class="text-sm text-gray-700">${t.DESCRICAO}</span>
+                  </label>
+                `).join("")}
+              </div>
+            `;
+            
+            // Listener para "Selecionar Todos"
+            document.getElementById("selectAllTipos").addEventListener("change", function() {
+              const checkboxes = document.querySelectorAll(".tipo-checkbox");
+              checkboxes.forEach(cb => cb.checked = this.checked);
+              atualizarContador();
+            });
+            
+            // Listeners para checkboxes individuais
+            document.querySelectorAll(".tipo-checkbox").forEach(cb => {
+              cb.addEventListener("change", atualizarContador);
+            });
+            
+            atualizarContador();
+          });
+          
+          function atualizarContador() {
+            const checkboxes = document.querySelectorAll(".tipo-checkbox:checked");
+            const count = checkboxes.length;
+            document.getElementById("tiposSelecionados").textContent = `${count} tipo${count !== 1 ? 's' : ''} selecionado${count !== 1 ? 's' : ''}`;
+            document.getElementById("btnVincular").disabled = count === 0;
+            
+            // Atualizar estado do "Selecionar Todos"
+            const allCheckboxes = document.querySelectorAll(".tipo-checkbox");
+            const selectAll = document.getElementById("selectAllTipos");
+            if (selectAll) {
+              selectAll.checked = allCheckboxes.length > 0 && checkboxes.length === allCheckboxes.length;
+            }
+          }
+
+          document
+            .getElementById("formNovoVinculo")
+            .addEventListener("submit", async function (e) {
+              e.preventDefault();
+
+              const sistemaId = parseInt(document.getElementById("selectSistemaVinculo").value);
+              const tiposSelecionados = Array.from(document.querySelectorAll(".tipo-checkbox:checked"))
+                .map(cb => parseInt(cb.value));
+
+              if (!sistemaId || tiposSelecionados.length === 0) {
+                Swal.fire({
+                  icon: 'warning',
+                  title: 'Atenção',
+                  text: 'Selecione um sistema e pelo menos um tipo de produtividade',
+                  confirmButtonColor: '#3B82F6'
+                });
+                return;
+              }
+
+              try {
+                const response = await fetch("/api/v1/sistema-tipo-produtividade/batch", {
+                  method: "POST",
+                  headers: {
+                    "Content-Type": "application/json",
+                  },
+                  body: JSON.stringify({
+                    CODSISTEMA: sistemaId,
+                    TIPOS: tiposSelecionados
+                  }),
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                  Swal.fire({
+                    icon: 'success',
+                    title: 'Sucesso!',
+                    text: `${result.created || tiposSelecionados.length} vínculo(s) criado(s) com sucesso!`,
+                    timer: 2000,
+                    showConfirmButton: false
+                  }).then(() => {
+                    abrirModal("vincular-sistema-tipo");
+                  });
+                } else {
+                  Swal.fire({
+                    icon: 'error',
+                    title: 'Erro',
+                    text: result.error || 'Erro ao criar vínculos',
+                    confirmButtonColor: '#EF4444'
+                  });
+                }
+              } catch (error) {
+                console.error("Erro ao criar vínculos:", error);
+                Swal.fire({
+                  icon: 'error',
+                  title: 'Erro',
+                  text: 'Erro ao criar vínculos',
+                  confirmButtonColor: '#EF4444'
+                });
+              }
+            });
+        } catch (error) {
+          container.innerHTML = `
+                    <div class="px-6 py-4 border-b border-gray-200">
+                        <h3 class="text-lg font-semibold text-gray-900">Erro</h3>
+                    </div>
+                    <div class="p-6">
+                        <p class="text-red-600">Erro ao carregar dados: ${error.message}</p>
+                    </div>
+                `;
+        }
+      }
+
+      // Funções para gerenciar sistemas
+      async function editarSistema(id, descricao) {
+        const novaDescricao = prompt("Editar descrição do sistema:", descricao);
+        if (novaDescricao && novaDescricao !== descricao) {
+          try {
+            const response = await fetch(`/api/v1/sistemas/${id}`, {
+              method: "PUT",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({ DESCRICAO: novaDescricao }),
+            });
+
+            const result = await response.json();
+
+            if (result.success) {
+              Swal.fire({
+                icon: 'success',
+                title: 'Sucesso!',
+                text: 'Sistema atualizado com sucesso!',
+                timer: 2000,
+                showConfirmButton: false
+              }).then(() => {
+                abrirModal("sistemas");
+              });
+            } else {
+              Swal.fire({
+                icon: 'error',
+                title: 'Erro',
+                text: result.error || 'Erro ao atualizar sistema',
+                confirmButtonColor: '#EF4444'
+              });
+            }
+          } catch (error) {
+            console.error("Erro ao atualizar sistema:", error);
+            Swal.fire({
+              icon: 'error',
+              title: 'Erro',
+              text: 'Erro ao atualizar sistema',
+              confirmButtonColor: '#EF4444'
+            });
+          }
+        }
+      }
+
+      async function excluirSistema(id) {
+        const result = await Swal.fire({
+          icon: 'warning',
+          title: 'Excluir Sistema?',
+          text: 'Tem certeza que deseja excluir este sistema? Esta ação não pode ser desfeita e pode afetar solicitações vinculadas.',
+          showCancelButton: true,
+          confirmButtonColor: '#EF4444',
+          cancelButtonColor: '#6B7280',
+          confirmButtonText: 'Sim, excluir',
+          cancelButtonText: 'Cancelar',
+          showLoaderOnConfirm: true,
+          preConfirm: async () => {
+            try {
+              const response = await fetch(`/api/v1/sistemas/${id}`, {
+                method: "DELETE",
+              });
+              return await response.json();
+            } catch (error) {
+              Swal.showValidationMessage('Erro ao excluir sistema');
+            }
+          },
+          allowOutsideClick: () => !Swal.isLoading()
+        });
+
+        if (result.isConfirmed && result.value) {
+          if (result.value.success) {
+            Swal.fire({
+              icon: 'success',
+              title: 'Excluído!',
+              text: 'Sistema excluído com sucesso!',
+              timer: 2000,
+              showConfirmButton: false
+            }).then(() => {
+              abrirModal("sistemas");
+              carregarEstatisticas();
+            });
+          } else {
+            Swal.fire({
+              icon: 'error',
+              title: 'Erro',
+              text: result.value.error || 'Erro ao excluir sistema',
+              confirmButtonColor: '#EF4444'
+            });
+          }
+        }
+      }
+
+      // Funções para gerenciar tipos de produtividade
+      async function editarTipoProdutividade(id, descricao, pontos, tipo) {
+        const novaDescricao = prompt("Editar descrição:", descricao);
+        if (novaDescricao && novaDescricao !== descricao) {
+          try {
+            const response = await fetch(`/api/v1/tipos-produtividade/${id}`, {
+              method: "PUT",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                DESCRICAO: novaDescricao,
+                PONTOS: pontos,
+                TIPO: tipo,
+              }),
+            });
+
+            const result = await response.json();
+
+            if (result.success) {
+              Swal.fire({
+                icon: 'success',
+                title: 'Sucesso!',
+                text: 'Tipo de produtividade atualizado com sucesso!',
+                timer: 2000,
+                showConfirmButton: false
+              }).then(() => {
+                abrirModal("tipos-produtividade");
+              });
+            } else {
+              Swal.fire({
+                icon: 'error',
+                title: 'Erro',
+                text: result.error || 'Erro ao atualizar tipo de produtividade',
+                confirmButtonColor: '#EF4444'
+              });
+            }
+          } catch (error) {
+            console.error("Erro ao atualizar tipo:", error);
+            Swal.fire({
+              icon: 'error',
+              title: 'Erro',
+              text: 'Erro ao atualizar tipo de produtividade',
+              confirmButtonColor: '#EF4444'
+            });
+          }
+        }
+      }
+
+      async function excluirTipoProdutividade(id) {
+        const result = await Swal.fire({
+          icon: 'warning',
+          title: 'Excluir Tipo de Produtividade?',
+          text: 'Tem certeza que deseja excluir este tipo de produtividade? Esta ação não pode ser desfeita e pode afetar solicitações vinculadas.',
+          showCancelButton: true,
+          confirmButtonColor: '#EF4444',
+          cancelButtonColor: '#6B7280',
+          confirmButtonText: 'Sim, excluir',
+          cancelButtonText: 'Cancelar',
+          showLoaderOnConfirm: true,
+          preConfirm: async () => {
+            try {
+              const response = await fetch(`/api/v1/tipos-produtividade/${id}`, {
+                method: "DELETE",
+              });
+              return await response.json();
+            } catch (error) {
+              Swal.showValidationMessage('Erro ao excluir tipo de produtividade');
+            }
+          },
+          allowOutsideClick: () => !Swal.isLoading()
+        });
+
+        if (result.isConfirmed && result.value) {
+          if (result.value.success) {
+            Swal.fire({
+              icon: 'success',
+              title: 'Excluído!',
+              text: 'Tipo de produtividade excluído com sucesso!',
+              timer: 2000,
+              showConfirmButton: false
+            }).then(() => {
+              abrirModal("tipos-produtividade");
+              carregarEstatisticas();
+            });
+          } else {
+            Swal.fire({
+              icon: 'error',
+              title: 'Erro',
+              text: result.value.error || 'Erro ao excluir tipo de produtividade',
+              confirmButtonColor: '#EF4444'
+            });
+          }
+        }
+      }
+
+      // Função para excluir vínculo
+      async function excluirVinculo(id) {
+        const result = await Swal.fire({
+          icon: 'warning',
+          title: 'Excluir Vínculo?',
+          text: 'Tem certeza que deseja excluir este vínculo entre sistema e tipo de produtividade?',
+          showCancelButton: true,
+          confirmButtonColor: '#EF4444',
+          cancelButtonColor: '#6B7280',
+          confirmButtonText: 'Sim, excluir',
+          cancelButtonText: 'Cancelar',
+          showLoaderOnConfirm: true,
+          preConfirm: async () => {
+            try {
+              const response = await fetch(`/api/v1/sistema-tipo-produtividade/${id}`, {
+                method: "DELETE",
+              });
+              return await response.json();
+            } catch (error) {
+              Swal.showValidationMessage('Erro ao excluir vínculo');
+            }
+          },
+          allowOutsideClick: () => !Swal.isLoading()
+        });
+
+        if (result.isConfirmed && result.value) {
+          if (result.value.success) {
+            Swal.fire({
+              icon: 'success',
+              title: 'Excluído!',
+              text: 'Vínculo excluído com sucesso!',
+              timer: 2000,
+              showConfirmButton: false
+            }).then(() => {
+              abrirModal("vincular-sistema-tipo");
+            });
+          } else {
+            Swal.fire({
+              icon: 'error',
+              title: 'Erro',
+              text: result.value.error || 'Erro ao excluir vínculo',
+              confirmButtonColor: '#EF4444'
+            });
+          }
+        }
       }
     </script>
   </body>
